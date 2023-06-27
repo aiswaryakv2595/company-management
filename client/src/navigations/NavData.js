@@ -1,0 +1,239 @@
+import { AssignmentTurnedInOutlined, CoPresentOutlined, DangerousOutlined, FactCheckOutlined, GroupsOutlined, HomeOutlined, PresentToAllOutlined, Task, TimerSharp, VideoCall, Work, WorkHistory } from "@mui/icons-material";
+
+export const navItems = [
+    {
+      text: 'Dashboard',
+      icon: <HomeOutlined />,
+      route: 'admin/dashboard',
+      subItems: [],
+    },
+    {
+      text: 'Employee',
+      icon: null,
+      subItems: [
+        {
+          route:'admin/employees',
+          text: 'All Employees',
+          icon: <GroupsOutlined />,
+        },
+        {
+          route:'admin/leaves',
+          text: 'Leaves',
+          icon: <FactCheckOutlined />,
+        },
+        {
+          route:'admin/attendance',
+          text: 'Attendance',
+          icon: <CoPresentOutlined />,
+        },
+      ],
+    },
+    {
+      text: 'Projects',
+      icon: null,
+      subItems: [
+        {
+          route:'admin/projects',
+          text: 'All Project',
+          icon: <PresentToAllOutlined />,
+        },
+        {
+          route:'admin/tasks',
+          text: 'All Tasks',
+          icon: <AssignmentTurnedInOutlined />,
+        },
+      ],
+    },
+    {
+      text: 'Complaints',
+      icon: null,
+      subItems: [
+        {
+          route:'admin/requests',
+          text: 'View Requests',
+          icon: <DangerousOutlined />,
+        },
+      ],
+    },
+    {
+      text: 'Payroll',
+      icon: null,
+      subItems: [],
+    },
+  ];
+
+  // employee navs
+  export const navItemsEmp = [
+    {
+      text: 'Dashboard',
+      icon: <HomeOutlined />,
+      route: 'dashboard',
+      subItems: [],
+    },
+    {
+      text: 'Leaves',
+      icon: null,
+      subItems: [
+        {
+          route:'leaves',
+          text: 'My Leaves',
+          icon: <GroupsOutlined />,
+        },
+        {
+          route:'holiday',
+          text: 'My Holiday',
+          icon: <FactCheckOutlined />,
+        },
+      ],
+    },
+    {
+      text: 'Attendance',
+      icon: null,
+      subItems: [
+        {
+          route:'attendance',
+          text: 'Attendance Report',
+          icon: <PresentToAllOutlined />,
+        },
+        
+      ],
+    },
+    {
+      text: 'On Duty',
+      icon: null,
+      subItems: [
+        {
+          route:'onduty',
+          text: 'On Duty Listing',
+          icon: <Work />,
+        },
+      ],
+    },
+    {
+      text: 'Time Sheet',
+      icon: null,
+      subItems: [
+        {
+            route:'timesheet',
+            text:'My Time Sheet',
+            icon: <TimerSharp />,
+        }
+      ],
+    },
+    {
+        text: 'Complaints',
+        icon: null,
+        subItems: [
+          {
+              route:'request',
+              text:'My Request',
+              icon: <DangerousOutlined />,
+          }
+        ],
+      },
+      {
+        text: 'Meet',
+        icon: <VideoCall />,
+        route: 'meet',
+        subItems: [],
+      },
+  ];
+
+  //team teamlead
+  export const navItemsteamlead = [
+    {
+      text: 'Dashboard',
+      icon: <HomeOutlined />,
+      route: 'teamlead/dashboard',
+      subItems: [],
+    },
+    {
+      text: 'Leaves',
+      icon: null,
+      subItems: [
+        {
+          route:'teamlead/leaves',
+          text: 'My Leaves',
+          icon: <GroupsOutlined />,
+        },
+        {
+          route:'teamlead/holiday',
+          text: 'My Holiday',
+          icon: <FactCheckOutlined />,
+        },
+      ],
+    },
+    {
+      text: 'Attendance',
+      icon: null,
+      subItems: [
+        {
+          route:'teamlead/attendance',
+          text: 'Attendance Report',
+          icon: <PresentToAllOutlined />,
+        },
+        
+      ],
+    },
+    {
+      text: 'On Duty',
+      icon: null,
+      subItems: [
+        {
+          route:'teamlead/onduty',
+          text: 'On Duty Listing',
+          icon: <Work />,
+        },
+        {
+          route:'teamlead/onduty-approval',
+          text: 'Duty Approval',
+          icon: <Work />,
+        },
+      ],
+    },
+    {
+      text: 'Time Sheet',
+      icon: null,
+      subItems: [
+        {
+            route:'teamlead/timesheet',
+            text:'My Time Sheet',
+            icon: <TimerSharp />,
+        }
+      ],
+    },
+    {
+      text: 'Projects',
+      icon: null,
+      subItems: [
+        {
+            route:'teamlead/view-project',
+            text:'All Projects',
+            icon: <WorkHistory />,
+        },
+        {
+          route:'teamlead/view-tasks',
+          text:'All Tasks',
+          icon: <Task />,
+      }
+      ],
+    },
+    
+    {
+        text: 'Complaints',
+        icon: null,
+        subItems: [
+          {
+              route:'teamlead/request',
+              text:'My Request',
+              icon: <DangerousOutlined />,
+          }
+        ],
+      },
+      {
+        text: 'Meet',
+        icon: <VideoCall />,
+        route: 'teamlead/meet',
+        subItems: [],
+      },
+  ];
