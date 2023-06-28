@@ -66,7 +66,8 @@ const LoginForm = () => {
       password: inputs.password,
     });
     const data = res.data;
-    dispatch(login({ email: inputs.email, password: inputs.password,role: data.role }));
+    dispatch(login({ email: inputs.email, password: inputs.password, role: data.role }));
+    console.log('login',data)
     const token = res.data.token;
 
     // Store the token in localStorage
