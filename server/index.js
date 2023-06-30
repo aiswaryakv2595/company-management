@@ -19,9 +19,14 @@ mongoose.connect('mongodb://127.0.0.1:27017/CMS').then(()=>{
 //Admin routes
 const adminRouter = require('./routes/adminRoutes');
 const employeeRouter = require('./routes/employeeRoute');
+const teamleadRouter = require('./routes/teamleadRoutes')
 const { login, authUser } = require('./controller/globalController');
 const { jwtAuth } = require('./middleware/jwtAuth');
+
 app.use('/api/admin',adminRouter)
 app.use('/api/employee',employeeRouter)
+app.use('/api/teamlead',teamleadRouter)
+
+
 app.post('/api',login)
 app.get('/api/details',jwtAuth,authUser)

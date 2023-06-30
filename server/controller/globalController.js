@@ -16,7 +16,7 @@ const login = async (req, res) => {
       const token = jwt.sign(
         { empId: employee._id, email: employee.email,role:employee.role },
         process.env.JWT_ADMIN,
-        { expiresIn: "1h" } // Token expiration time
+        { expiresIn: "1d" } // Token expiration time
       );
       res.status(200).json({ token: token, role: employee.role });
     } catch (error) {

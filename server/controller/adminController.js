@@ -39,41 +39,16 @@ const adminSignup = async (req, res) => {
       .json({ message: "An error occurred while signing up admin." });
   }
 };
-// const adminLogin = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     const admin = await Employee.findOne({ email: email });
-//     if (!admin) {
-//       return res.status(404).json({ message: "Employee not found." });
-//     }
-//     const isPasswordValid = await bcrypt.compare(password, admin.password);
-//     if (!isPasswordValid) {
-//       return res.status(401).json({ message: "Invalid password." });
-//     }
-//     // Generate a JWT token
-//     const token = jwt.sign(
-//       { adminId: admin._id, email: admin.email },
-//       process.env.JWT_ADMIN,
-//       { expiresIn: "1h" } // Token expiration time
-//     );
-//     res.status(200).json({ token: token });
-//   } catch (error) {
-//     console.error("Error logging in admin:", error);
-//     res
-//       .status(500)
-//       .json({ message: "An error occurred while logging in admin." });
-//   }
-// };
 
-// const adminDetails = async (req, res) => {
-//   const admin = req.admin;
-//   console.log("admin", admin);
-//   res.status(200).json({ admin: admin });
-// };
 const employeeDetails = async (req, res) => {
   try {
+    const { role } = req.query;
     const employee = await Employee.find();
-    if (employee) {
+    const teamLeaders = employee.filter((employee) => employee.role === role);
+    if(role){
+      return res.json({ employee: teamLeaders });
+    }
+    else if (employee) {
       return res.status(200).json({ employee });
     } else {
       return res.status(404).json({ message: "User not found" });

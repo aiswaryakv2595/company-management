@@ -17,6 +17,8 @@ import LeadDashboard from './scenes/teamlead/dashboard/LeadDashboard';
 import LeadLayout from './scenes/teamlead/layout/LeadLayout';
 import EmployeePrivate from './routes/EmployeePrivate';
 import TlPrivateRoute from './routes/TlPrivateRoute';
+import AllProjects from './scenes/admin/project/AllProjects';
+import ViewProject from './scenes/teamlead/project/ViewProject';
 
 
 
@@ -35,6 +37,7 @@ function App() {
           <Route element = {<Layout/>}>
             <Route path='/admin/dashboard' element={<Dashboard/>}/>
             <Route path='/admin/employees' element={<AllEmployees/>}/>
+            <Route path='/admin/projects' element={<AllProjects/>}/>
             
           </Route>
           </Route>
@@ -51,6 +54,7 @@ function App() {
           <Route element={<TlPrivateRoute/>}>
           <Route element = {<LeadLayout/>}>
           <Route path='/teamlead/dashboard' element={<LeadDashboard/>}/>
+          <Route path='/teamlead/view-project' element={<ViewProject/>}/>
           </Route>
           </Route>
         </Routes>
