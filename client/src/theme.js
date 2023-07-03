@@ -2,7 +2,7 @@
 export const tokensDark = {
  
     grey: {
-      0: "#ffffff", // manually adjusted
+      0: "#eefbff", // manually adjusted
       10: "#f6f6f6", // manually adjusted
       50: "#f0f0f0", // manually adjusted
       100: "#e0e0e0",
@@ -19,18 +19,20 @@ export const tokensDark = {
    
     primary: {
       // blue
+      50:"#212a3e",
       100: "#d3d4de",
       200: "#a6a9be",
       300: "#7a7f9d",
       400: "#4d547d",
       500: "#21295c",
-      600: "#191F45", // manually adjusted
+      600: "#000000", // manually adjusted
       700: "#141937",
       800: "#0d1025",
       900: "#070812",
     },
     secondary: {
       // yellow
+      20: "#FFDFB2",
       50: "#f0f0f0", // manually adjusted
       100: "#fff6e0",
       200: "#ffedc2",
@@ -41,6 +43,8 @@ export const tokensDark = {
       700: "#997d3d",
       800: "#665429",
       900: "#332a14",
+      1000:"#ffffff"
+
     },
   };
   
@@ -71,17 +75,17 @@ export const themeSettings = () => {
         white: "#ffffff", // Add the common.white color
       },
       primary: {
-        ...tokensLight.primary,
+        ...tokensDark.primary,
         main: tokensDark.grey[50],
         light: tokensDark.grey[100],
       },
       secondary: {
-        ...tokensLight.secondary,
-        main: tokensDark.secondary[600],
+        ...tokensDark.secondary,
+        main: "#a1dbec",
         light: tokensDark.secondary[700],
       },
       neutral: {
-        ...tokensLight.grey,
+        ...tokensDark.grey,
         main: tokensDark.grey[500],
       },
       background: {

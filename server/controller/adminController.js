@@ -1,6 +1,7 @@
 const Employee = require("../model/Employee");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Department = require("../model/Department");
 
 const adminSignup = async (req, res) => {
   try {
@@ -40,21 +41,78 @@ const adminSignup = async (req, res) => {
   }
 };
 
+const departmentDetails = async (req, res) => {
+  try {
+    const department = await Department.find();
+    if (department) {
+      res.status(200).json({ department });
+    } else {
+      res.status(404).json({ message: "Something went wrong" });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+};
+
+const addDepartment = async (req, res) => {
+  try {
+    const { department, designation } = req.body;
+    const existingDepartment = await Department.findOne({
+      designation: designation,
+    });
+    if(existingDepartment){
+      res.json({message:"Department already exist"})
+    }
+    else{
+      const departmentData = new Department({
+        department:department,
+        designation:designation
+      })
+      await departmentData.save()
+      res.status(201).json({ message: "Department added successfully" });
+    }
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({ message: "Unable to add department" });
+  }
+};
 const employeeDetails = async (req, res) => {
   try {
     const { role } = req.query;
-    const employee = await Employee.find();
-    const teamLeaders = employee.filter((employee) => employee.role === role);
-    if(role){
-      return res.json({ employee: teamLeaders });
+
+    let aggregationPipeline = [
+      {
+        $lookup: {
+          from: "departments", // Name of the Department collection
+          localField: "designation",
+          foreignField: "_id",
+          as: "department",
+        },
+      },
+    ];
+
+    if (role) {
+      aggregationPipeline = [
+        ...aggregationPipeline,
+        {
+          $match: { role },
+        },
+      ];
     }
-    else if (employee) {
-      return res.status(200).json({ employee });
+
+    const employees = await Employee.aggregate(aggregationPipeline);
+    console.log(employees);
+
+    if (employees.length > 0) {
+      return res.status(200).json({ employees });
     } else {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "No employees found" });
     }
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
+
 // add employees
 const addEmployees = async (req, res) => {
   try {
@@ -69,7 +127,7 @@ const addEmployees = async (req, res) => {
       age,
       designation,
       gender,
-      role
+      role,
     } = req.body;
     const existingEmployee = await Employee.findOne({
       email: email,
@@ -89,10 +147,10 @@ const addEmployees = async (req, res) => {
       password: hashedPassword,
       designation: designation,
       gender: gender,
-      joining_date:joining_date,
-      phone:phone,
-      dob:dob,
-      age:age,
+      joining_date: joining_date,
+      phone: phone,
+      dob: dob,
+      age: age,
       role: role,
     });
     await employee.save();
@@ -104,8 +162,8 @@ const addEmployees = async (req, res) => {
 };
 module.exports = {
   adminSignup,
-  // adminLogin,
-  // adminDetails,
+  departmentDetails,
+  addDepartment,
   employeeDetails,
   addEmployees,
 };

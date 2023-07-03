@@ -59,12 +59,64 @@ const viewTeamleadProject = async(req,res) =>{
       }
     
   } catch (error) {
+    res.status(500).json({error})
+  }
+}
+const editProject = async(req,res) =>{
+  try {
+    const projectId = req.params.projectId
+    
+    const project = await Project.findById({_id:projectId})
+    if(project){
+      res.status(200).json({project})
+    }
+    else{
+      res.status(404).json({message:"Project not found"})
+    }
+  } catch (error) {
+    res.status(500).json({error})
+  }
+}
+const updateProject = async(req,res) =>{
+  try {
+    const projectId = req.params.projectId
+    const {
+      project_name,
+      assigned_to,
+      starting_time,
+      deadline,
+      priority,
+      status,
+      description
+    } = req.body;
+    let attachment = req.file;
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    project.assigned_to = assigned_to;
+    project.starting_time = starting_time;
+    project.deadline = deadline;
+    project.priority = priority;
+    project.status = status;
+    project.description = description;
+
+    if (attachment) {
+      project.attachment = attachment.filename;
+    }
+    const updatedProject = await project.save();
+
+    res.status(200).json({ project: updatedProject });
+  } catch (error) {
     
   }
 }
-
 module.exports = {
   viewAllProject,
   addProject,
-  viewTeamleadProject
+  viewTeamleadProject,
+  editProject,
+  updateProject
 };

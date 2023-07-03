@@ -7,15 +7,26 @@ const employeeSchema = new mongoose.Schema({
   last_name: String,
   email: String,
   password: String,
-  designation: String,
+  designation: {
+    type: mongoose.Schema.Types.ObjectId,
+      ref: 'Department',
+    validate: {
+      validator: async function (_id) {
+        const Department = mongoose.model('Department');
+        const departmentCount = await Department.countDocuments({ _id });
+        return departmentCount > 0;
+      },
+      message: 'Invalid designation.',
+    },
+  },
   phone: String,
   gender: String,
   age: Number,
   dob: Date,
-  joining_date:Date,
-  end_date:Date,
+  joining_date: Date,
+  end_date: Date,
   address: String,
-  profilePic:String,
+  profilePic: String,
   role: String
 });
 
@@ -29,6 +40,5 @@ employeeSchema.pre('save', async function (next) {
   }
   next();
 });
-
 
 module.exports = mongoose.model('Employee', employeeSchema);

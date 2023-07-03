@@ -19,6 +19,10 @@ import EmployeePrivate from './routes/EmployeePrivate';
 import TlPrivateRoute from './routes/TlPrivateRoute';
 import AllProjects from './scenes/admin/project/AllProjects';
 import ViewProject from './scenes/teamlead/project/ViewProject';
+import EditProject from './scenes/admin/project/EditProject';
+import Department from './scenes/admin/department/Department';
+import ProfileSettings from './scenes/employees/profile/ProfileSettings';
+
 
 
 
@@ -36,8 +40,10 @@ function App() {
         <Route element={<AdminPrivateRoutes/>}>
           <Route element = {<Layout/>}>
             <Route path='/admin/dashboard' element={<Dashboard/>}/>
+            <Route path='/admin/department' element={<Department/>}/>
             <Route path='/admin/employees' element={<AllEmployees/>}/>
             <Route path='/admin/projects' element={<AllProjects/>}/>
+            <Route path="/admin/edit-project/:projectId" element={<EditProject/>} />
             
           </Route>
           </Route>
@@ -48,6 +54,7 @@ function App() {
           <Route element={<EmployeePrivate/>}>
           <Route element = {<EmployeeLayout/>}>
           <Route path='/dashboard' element={<EmpDashboard/>}/>
+          <Route path='/profile' element={<ProfileSettings/>}/>
           </Route>
           </Route>
           {/* teamlead routes */}

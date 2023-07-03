@@ -6,18 +6,26 @@ import {
   CardHeader,
   Grid,
   IconButton,
+  LinearProgress,
   Menu,
   MenuItem,
   Modal,
   TextField,
   Typography,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
+import { saveAs } from "file-saver";
 import React, { useEffect, useState } from "react";
 import Header from "../../../components/Header";
 import { useSelector } from "react-redux";
 import { api } from "../../../redux/api/api";
-import { MoreVert } from "@mui/icons-material";
+import {
+  AttachmentOutlined,
+  Diversity3,
+  EditCalendar,
+} from "@mui/icons-material";
+import { Link, useNavigate } from "react-router-dom";
 
 const AllProjects = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -25,15 +33,9 @@ const AllProjects = () => {
   const [project, setProject] = useState([]);
   const [employees, setEmployees] = useState([]);
   //for edit in project icon
-  const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const navigate = useNavigate();
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
   const [inputs, setInputs] = useState({
     project_name: "",
     starting_time: "",
@@ -57,7 +59,7 @@ const AllProjects = () => {
       setSelectedImage(file);
     }
   };
-
+  const theme = useTheme();
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -134,6 +136,21 @@ const AllProjects = () => {
       console.log("Error adding project:", error);
     }
   };
+  const handleDownloadAttachment = (attachmentUrl) => {
+    const filename = attachmentUrl.substring(
+      attachmentUrl.lastIndexOf("/") + 1
+    );
+    const extension = filename.substring(filename.lastIndexOf(".") + 1);
+    console.log("file name======", filename);
+    fetch(attachmentUrl)
+      .then((response) => response.blob())
+      .then((blob) => {
+        saveAs(blob, `attachment.${extension}`);
+      })
+      .catch((error) => {
+        console.log("Error downloading attachment:", error);
+      });
+  };
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -142,7 +159,8 @@ const AllProjects = () => {
         <Button
           variant="contained"
           sx={{
-            bgcolor: "#FF9B44",
+            bgcolor: theme.palette.primary[50],
+            color: theme.palette.secondary[1000],
           }}
           onClick={() => setOpenModal(true)}
         >
@@ -155,26 +173,45 @@ const AllProjects = () => {
             <Card
               key={prj._id}
               sx={{
-                maxWidth: 245,
-               
+                maxWidth: 345,
               }}
             >
               <CardHeader
                 action={
                   <>
-                    <IconButton
-                      aria-label="settings"
-                      onClick={handleMenuOpen}
-                    >
-                      <MoreVert />
-                    </IconButton>
-                    <Menu
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl)}
-                      onClose={handleMenuClose}
-                    >
-                      <MenuItem onClick={handleMenuClose}>Edit</MenuItem>
-                    </Menu>
+                    <Link to={`/admin/edit-project/${prj._id}`}>
+                      <IconButton
+                        aria-label="settings"
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "orange",
+                          },
+                          "&:hover svg": {
+                            color: "white",
+                          },
+                          borderRadius: "50%",
+                          width: "36px",
+                          height: "36px",
+                          padding: "4px",
+                          backgroundColor: "transparent",
+                        }}
+                      >
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: "50%",
+                            backgroundColor: "inherit",
+                            transition: "background-color 0.3s ease",
+                          }}
+                        >
+                          <EditCalendar sx={{ color: "green" }} />
+                        </Box>
+                      </IconButton>
+                    </Link>
                   </>
                 }
                 title={prj.project_name}
@@ -184,12 +221,45 @@ const AllProjects = () => {
                 <Typography variant="h6" gutterBottom>
                   Status: {prj.status}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {prj.description}
-                </Typography>
+                <Grid container spacing={2} sx={{ mb: 1 }}>
+                  <Grid item xs={12} sm={6}>
+                    <Box display="flex" alignItems="center" mt={2}>
+                      <AttachmentOutlined sx={{ marginRight: "5px" }} />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        onClick={() => handleDownloadAttachment(prj.attachment)}
+                        sx={{
+                          marginLeft: "5px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        1 File
+                      </Typography>
+                      <IconButton
+                        aria-label="download attachment"
+                        onClick={() => handleDownloadAttachment(prj.attachment)}
+                        sx={{ marginLeft: "5px" }}
+                      ></IconButton>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box display="flex" alignItems="center" mt={2}>
+                      <Diversity3 sx={{ marginRight: "8px" }} />
+                      <Typography variant="body2" color="text.secondary">
+                        Members
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   Deadline:
-                  <Typography gutterBottom variant="h6" component="div">
+                  <Typography
+                    gutterBottom
+                    variant="body2"
+                    color="text.secondary"
+                  >
                     {new Date(prj.deadline).toLocaleDateString()}
                   </Typography>
                 </Typography>
@@ -202,6 +272,27 @@ const AllProjects = () => {
                       prj.assigned_to.last_name}
                   </Typography>
                 </Typography>
+                <Typography gutterBottom variant="h6" component="div">
+                  Team:
+                </Typography>
+                <Box mt={2}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Progress
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={10}
+                    sx={{
+                      "& .MuiLinearProgress-bar": {
+                        backgroundColor: "green",
+                      },
+                    }}
+                  />
+                </Box>
               </CardContent>
             </Card>
           ))}
@@ -288,9 +379,9 @@ const AllProjects = () => {
                   name="priority"
                   select
                 >
-                  <MenuItem value="Male">High</MenuItem>
-                  <MenuItem value="Female">Medium</MenuItem>
-                  <MenuItem value="Female">Low</MenuItem>
+                  <MenuItem value="High">High</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="Low">Low</MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>

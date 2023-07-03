@@ -11,6 +11,7 @@ import {
   MenuItem,
   Modal,
   Grid,
+  useTheme,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { api } from "../../../redux/api/api";
@@ -19,6 +20,7 @@ import Header from "../../../components/Header";
 const AllEmployees = () => {
   const isMobile = useMediaQuery("(min-width:1000px)");
   const [employee, setEmployee] = useState([]);
+  const [department, setDepartment] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [inputs, setInputs] = useState({
     first_name: "",
@@ -30,8 +32,8 @@ const AllEmployees = () => {
     dob: "",
     designation: "",
     gender: "",
-    age:"",
-    role:""
+    age: "",
+    role: "",
   });
   const handleChange = (e) => {
     setInputs((prev) => ({
@@ -40,76 +42,84 @@ const AllEmployees = () => {
     }));
   };
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
+  const theme = useTheme();
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          console.log("Token is null or undefined");
-          return;
-        }
-
-        const response = await api.get("/admin/employees", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = response.data.employee;
-        console.log("data------", data);
-        setEmployee(data);
-      } catch (error) {
-        console.log("Error fetching user details:", error);
-      }
-    };
-
-    if (isLoggedIn) {
-      fetchUserDetails();
-    }
-  }, [isLoggedIn]);
-
-//add user
-
-const handleAddEmployee = async () => {
-  try {
     const token = localStorage.getItem("token");
 
     if (!token) {
       console.log("Token is null or undefined");
       return;
     }
+    const fetchUserDetails = async () => {
+      try {
+        const response = await api.get("/admin/employees", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    const response = await api.post(
-      "/admin/addemployees",
-      inputs,
-      {
+        const data = response.data.employees;
+        console.log("data------", data);
+        setEmployee(data);
+      } catch (error) {
+        console.log("Error fetching user details:", error);
+      }
+    };
+    const fetchDepartment = async () => {
+      try {
+        const response = await api.get("/admin/department", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = response.data.department;
+        console.log("department------", data);
+        setDepartment(data);
+      } catch (error) {}
+    };
+
+    if (isLoggedIn) {
+      fetchUserDetails();
+      fetchDepartment();
+    }
+  }, [isLoggedIn]);
+
+  //add user
+
+  const handleAddEmployee = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.log("Token is null or undefined");
+        return;
+      }
+
+      const response = await api.post("/admin/addemployees", inputs, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
+      });
 
-    const newEmployee = response.data.employee;
-    console.log("New Employee:", newEmployee);
+      const newEmployee = response.data.employee;
+      console.log("New Employee:", newEmployee);
 
-    // Fetch the updated employee list
-    const updatedResponse = await api.get("/admin/employees", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      // Fetch the updated employee list
+      const updatedResponse = await api.get("/admin/employees", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const updatedData = updatedResponse.data.employee;
-    console.log("Updated Employee List:", updatedData);
+      const updatedData = updatedResponse.data.employees;
+      console.log("Updated Employee List:", updatedData);
 
-    setEmployee(updatedData);
-    setOpenModal(false);
-  } catch (error) {
-    console.log("Error adding employee:", error);
-  }
-};
-
+      setEmployee(updatedData);
+      setOpenModal(false);
+    } catch (error) {
+      console.log("Error adding employee:", error);
+    }
+  };
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -118,7 +128,8 @@ const handleAddEmployee = async () => {
         <Button
           variant="contained"
           sx={{
-            bgcolor: "#FF9B44",
+            bgcolor: theme.palette.primary[50],
+            color: theme.palette.secondary[1000],
           }}
           onClick={() => setOpenModal(true)}
         >
@@ -153,16 +164,16 @@ const handleAddEmployee = async () => {
           variant="outlined"
           sx={{ minWidth: 250 }}
         >
-          {employee.map((emp) => (
-            <MenuItem key={emp._id} value={emp.designation}>
-              {emp.designation ? emp.designation : ""}
+          {department.map((dept) => (
+            <MenuItem key={dept._id} value={dept.designation}>
+              {dept.designation ? dept.designation : ""}
             </MenuItem>
           ))}
         </TextField>
         <Button
           variant="contained"
           color="success"
-          sx={{ padding: "10px", minWidth: 200 }}
+          sx={{ padding: "10px", minWidth: 200, backgroundColor: "#f27457" }}
         >
           Search
         </Button>
@@ -197,11 +208,18 @@ const handleAddEmployee = async () => {
                   {emp.first_name + " " + emp.last_name}
                 </Typography>
                 <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ textAlign: "center" }}
+                >
+                  Employee ID : {emp.emp_id}
+                </Typography>
+                <Typography
                   variant="body2"
                   color="text.secondary"
                   sx={{ textAlign: "center" }}
                 >
-                  {emp.designation}
+                  {emp.department[0].designation}
                 </Typography>
               </CardContent>
             </Card>
@@ -256,40 +274,40 @@ const handleAddEmployee = async () => {
                 />
               </Grid>
               <Grid item xs={6}>
-              <TextField
-            label="Password"
-            type="password"
-            name="password"
-            value={inputs.password}
-            onChange={handleChange}
-          />
+                <TextField
+                  label="Password"
+                  type="password"
+                  name="password"
+                  value={inputs.password}
+                  onChange={handleChange}
+                />
               </Grid>
             </Grid>
 
             <Grid container spacing={2}>
-            <Grid item xs={6}>
-            <TextField
-            label="Joining Date"
-            type="date"
-            name="joining_date"
-            value={inputs.joining_date}
-            onChange={handleChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
+              <Grid item xs={6}>
+                <TextField
+                  label="Joining Date"
+                  type="date"
+                  name="joining_date"
+                  value={inputs.joining_date}
+                  onChange={handleChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </Grid>
               <Grid item xs={6}>
-              <TextField
-            label="Date of birth"
-            type="date"
-            name="dob"
-            value={inputs.dob}
-            onChange={handleChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
+                <TextField
+                  label="Date of birth"
+                  type="date"
+                  name="dob"
+                  value={inputs.dob}
+                  onChange={handleChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </Grid>
             </Grid>
 
@@ -311,10 +329,9 @@ const handleAddEmployee = async () => {
                 />
               </Grid>
             </Grid>
-            
 
             <Grid container spacing={2}>
-            <Grid item xs={6}>
+              <Grid item xs={6}>
                 <TextField
                   select
                   label="Gender"
@@ -329,29 +346,39 @@ const handleAddEmployee = async () => {
                 </TextField>
               </Grid>
               <Grid item xs={6}>
-              <TextField
+                <TextField
                   label="Designation"
                   name="designation"
+                  select
                   value={inputs.designation}
+                  fullWidth
                   onChange={handleChange}
-                />
+                >
+                  {department.map((dept) => (
+                    <MenuItem key={dept._id} value={dept._id}>
+                      {dept.designation ? dept.designation : ""}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
             </Grid>
 
             <TextField
-                  select
-                  label="Role"
-                  variant="outlined"
-                  value={inputs.role}
-                  sx={{ minWidth: 215 }}
-                  onChange={handleChange}
-                  name="role"
-                >
-                  <MenuItem value="employee">Employee</MenuItem>
-                  <MenuItem value="teamlead">Team Lead</MenuItem>
-                </TextField>
+              select
+              label="Role"
+              variant="outlined"
+              value={inputs.role}
+              sx={{ minWidth: 215 }}
+              onChange={handleChange}
+              name="role"
+            >
+              <MenuItem value="employee">Employee</MenuItem>
+              <MenuItem value="teamlead">Team Lead</MenuItem>
+            </TextField>
             {/* Submit Button */}
-            <Button variant="contained" onClick={handleAddEmployee}>Submit</Button>
+            <Button variant="contained" onClick={handleAddEmployee}>
+              Submit
+            </Button>
           </Box>
         </div>
       </Modal>
