@@ -30,7 +30,9 @@ const login = async (req, res) => {
   const authUser = async (req, res) => {
     const employee = req.employee;
     console.log("employee", employee);
-    res.status(200).json({ employee: employee });
+    await employee.populate('designation');
+    const designation = employee.designation;
+    res.status(200).json({ employee: employee, designation: designation });
   };
   module.exports = {
     login,

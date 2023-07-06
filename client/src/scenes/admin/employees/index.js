@@ -35,12 +35,25 @@ const AllEmployees = () => {
     age: "",
     role: "",
   });
+  const [searchInputs, setSearchInputs] = useState({
+    emp_id:"",
+    employeeName: "",
+    designation: "",
+  })
   const handleChange = (e) => {
     setInputs((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
+  //search
+  const handleSearch = (e) => {
+    setSearchInputs((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+  
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   const theme = useTheme();
   useEffect(() => {
@@ -59,7 +72,7 @@ const AllEmployees = () => {
         });
 
         const data = response.data.employees;
-        console.log("data------", data);
+       
         setEmployee(data);
       } catch (error) {
         console.log("Error fetching user details:", error);
@@ -120,6 +133,30 @@ const AllEmployees = () => {
       console.log("Error adding employee:", error);
     }
   };
+  const handleSearchEmployee = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        console.log("Token is null or undefined");
+        return;
+      }
+  console.log('searchInputs',searchInputs)
+      const response = await api.post("/admin/search", searchInputs, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const search = response.data.search;
+      console.log("search Employee:", search);
+  
+      setEmployee(search);
+    } catch (error) {
+      console.log("Error searching employee:", error);
+    }
+  };
+  
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -148,6 +185,9 @@ const AllEmployees = () => {
           id="outlined-basic"
           label="Employee ID"
           variant="outlined"
+          name="emp_id"
+          value={searchInputs.emp_id}
+          onChange={handleSearch}
           sx={{ minWidth: 200 }}
         />
 
@@ -155,6 +195,9 @@ const AllEmployees = () => {
           id="outlined-basic"
           label="Employee Name"
           variant="outlined"
+          name="employeeName"
+          value={searchInputs.employeeName}
+          onChange={handleSearch}
           sx={{ minWidth: 250 }}
         />
 
@@ -162,10 +205,13 @@ const AllEmployees = () => {
           select
           label="Designation"
           variant="outlined"
+          name="designation"
+          value={searchInputs.designation}
+          onChange={handleSearch}
           sx={{ minWidth: 250 }}
         >
           {department.map((dept) => (
-            <MenuItem key={dept._id} value={dept.designation}>
+            <MenuItem key={dept._id} value={dept._id}>
               {dept.designation ? dept.designation : ""}
             </MenuItem>
           ))}
@@ -173,6 +219,7 @@ const AllEmployees = () => {
         <Button
           variant="contained"
           color="success"
+          onClick={handleSearchEmployee}
           sx={{ padding: "10px", minWidth: 200, backgroundColor: "#f27457" }}
         >
           Search
@@ -192,12 +239,24 @@ const AllEmployees = () => {
           }}
         >
           {employee.map((emp) => (
-            <Card key={emp._id} sx={{ maxWidth: 345 }}>
+            <Card key={emp._id} sx={{ maxWidth: 245 }}>
               <CardMedia
-                sx={{ height: 140, borderRadius: "50%" }}
-                image={emp.profilePic || "/placeholder.png"}
+                sx={{
+                  height: 140,
+                  width: 140,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: "50%",
+                  objectFit: "cover", // add this property
+                }}
+                image={
+                  `http://localhost:5000/dp/${emp.profilePic}` ||
+                  "/placeholder.png"
+                }
                 title="Profile Picture"
               />
+
               <CardContent>
                 <Typography
                   gutterBottom

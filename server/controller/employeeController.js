@@ -27,7 +27,34 @@ const employeeLogin = async (req, res) => {
         .json({ message: "An error occurred while logging in admin." });
     }
   };
+  const updateProfile = async (req,res) => {
+    try {
+      const { phone, email, dob, gender, address } = req.body;
+      const profilePic = req.file
+      const id = req.employee._id;
+      const profile = await Employee.findOneAndUpdate(
+        { _id: id }, // Replace 'your-profile-id' with the actual ID
+        {
+          phone,
+          email,
+          dob,
+          gender,
+          address,
+          profilePic: profilePic ? profilePic.filename : undefined,
+        },
+      );
+      if (!profile) {
+        return res.status(404).json({ message: 'Profile not found' });
+      }
   
+      res.status(200).json({ message: 'Profile updated successfully', profile });
+      
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+    }
+  }
   module.exports = {
-    employeeLogin
+    employeeLogin,
+    updateProfile
   }

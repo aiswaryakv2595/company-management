@@ -2,6 +2,7 @@ const Employee = require("../model/Employee");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Department = require("../model/Department");
+const mongoose = require('mongoose');
 
 const adminSignup = async (req, res) => {
   try {
@@ -60,15 +61,14 @@ const addDepartment = async (req, res) => {
     const existingDepartment = await Department.findOne({
       designation: designation,
     });
-    if(existingDepartment){
-      res.json({message:"Department already exist"})
-    }
-    else{
+    if (existingDepartment) {
+      res.json({ message: "Department already exist" });
+    } else {
       const departmentData = new Department({
-        department:department,
-        designation:designation
-      })
-      await departmentData.save()
+        department: department,
+        designation: designation,
+      });
+      await departmentData.save();
       res.status(201).json({ message: "Department added successfully" });
     }
   } catch (error) {
@@ -160,10 +160,64 @@ const addEmployees = async (req, res) => {
     res.status(500).json({ message: "Unable to register employee" });
   }
 };
+//search
+const searchEmployee = async (req, res) => {
+  try {
+    const { emp_id, employeeName, designation } = req.body;
+
+    let aggregationPipeline = [];
+    aggregationPipeline.push({
+      $lookup: {
+        from: "departments",
+        localField: "designation",
+        foreignField: "_id",
+        as: "department",
+      },
+    });
+
+    if (emp_id) {
+      aggregationPipeline.push({
+        $match: { emp_id: { $regex: `^${emp_id}`, $options: "i" } },
+      });
+    }
+
+    if (employeeName) {
+      const regex = new RegExp(employeeName, "i");
+      aggregationPipeline.push({
+        $match: {
+          $or: [{ first_name: regex }, { last_name: regex }],
+        },
+      });
+    }
+
+    if (designation) {
+      const designationId = new mongoose.Types.ObjectId(designation);
+      aggregationPipeline.push({
+        $match: { designation: designationId },
+      });
+    }
+
+    const search = await Employee.aggregate(aggregationPipeline);
+    console.log(aggregationPipeline)
+    console.log('search');
+
+    if (Array.isArray(search) && search.length > 0) {
+      res.status(200).json({ search });
+    } else if (Array.isArray(search) && search.length === 0) {
+      res.status(404).json({ message: "No matching records found" });
+    } else {
+      res.status(200).json({ search: [] });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   adminSignup,
   departmentDetails,
   addDepartment,
   employeeDetails,
   addEmployees,
+  searchEmployee,
 };

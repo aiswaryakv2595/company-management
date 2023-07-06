@@ -75,7 +75,7 @@ const EditProject = () => {
           assigned_to: data.assigned_to,
           priority: data.priority,
           status: data.status,
-          attachment:data.attachment,
+          attachment: data.attachment,
           description: data.description,
         });
       } catch (error) {
@@ -214,35 +214,34 @@ const EditProject = () => {
                 </Grid>
               </Grid>
               <TextField
-              label="Attachment"
-              type="file"
-              variant="outlined"
-              fullWidth
-              onChange={handleFileChange}
-              name="attachment"
-              accept=".pdf,.doc,.docx"
-              sx={{mt:2}}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-             <span id="file-name-span">
+                label="Attachment"
+                type="file"
+                variant="outlined"
+                fullWidth
+                onChange={handleFileChange}
+                name="attachment"
+                accept=".pdf,.doc,.docx"
+                sx={{ mt: 2 }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <span id="file-name-span">
                 {formValues.attachment ? formValues.attachment : ""}
               </span>
-             
-           
+
               <TextField
-              sx={{mt:2}}
-              multiline
-              rows={4}
-              label="Description"
-              type="textarea"
-              variant="outlined"
-              value={formValues.description}
-              fullWidth
-              onChange={handleChange}
-              name="description"
-            />
+                sx={{ mt: 2 }}
+                multiline
+                rows={4}
+                label="Description"
+                type="textarea"
+                variant="outlined"
+                value={formValues.description}
+                fullWidth
+                onChange={handleChange}
+                name="description"
+              />
               <Button type="submit" variant="contained">
                 Save
               </Button>

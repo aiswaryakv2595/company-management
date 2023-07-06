@@ -9,8 +9,10 @@ const jwtAuth = async (req, res, next) => {
 
     const empId = decodedToken.empId;
     const email = decodedToken.email;
+    
 
     // Find the admin by adminId and email
+
     const employee = await Employee.findOne({ _id: empId, email: email });
 
     if (!employee) {
