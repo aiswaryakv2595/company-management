@@ -21,9 +21,11 @@ import AllProjects from './scenes/admin/project/AllProjects';
 import ViewProject from './scenes/teamlead/project/ViewProject';
 import EditProject from './scenes/admin/project/EditProject';
 import Department from './scenes/admin/department/Department';
-import ProfileSettings from './scenes/employees/profile/ProfileSettings';
-
-
+import ProfileSettings from './scenes/profile/ProfileSettings';
+import ForgotPassword from './scenes/password/ForgotPassword';
+import OtpPage from './scenes/password/OtpPage';
+import ResetPassword from './scenes/password/ResetPassword';
+import AddTask from './scenes/teamlead/project/AddTask';
 
 
 
@@ -48,8 +50,10 @@ function App() {
           </Route>
           </Route>
           <Route element={<AdminPublicRoutes/>}>
-          <Route path="/" element= {<LoginForm/>}>
-          </Route>
+          <Route path="/" element= {<LoginForm/>}/>
+          <Route path="/forgot-password" element= {<ForgotPassword/>}/>
+          <Route path="/reset-password/otp" element= {<OtpPage/>}/>
+          <Route path='/reset-password' element = {<ResetPassword/>}/>
           </Route>
           <Route element={<EmployeePrivate/>}>
           <Route element = {<EmployeeLayout/>}>
@@ -60,8 +64,10 @@ function App() {
           {/* teamlead routes */}
           <Route element={<TlPrivateRoute/>}>
           <Route element = {<LeadLayout/>}>
+          <Route path='/teamlead/profile' element={<ProfileSettings/>}/>
           <Route path='/teamlead/dashboard' element={<LeadDashboard/>}/>
           <Route path='/teamlead/view-project' element={<ViewProject/>}/>
+          <Route path='/teamlead/view-tasks' element={<AddTask/>}/>
           </Route>
           </Route>
         </Routes>

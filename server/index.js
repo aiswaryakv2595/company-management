@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const path = require('path')
 const app = express();
+
 app.use(morgan('dev'));
 dotenv.config();
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
@@ -56,7 +57,7 @@ mongoose
 const adminRouter = require('./routes/adminRoutes');
 const employeeRouter = require('./routes/employeeRoute');
 const teamleadRouter = require('./routes/teamleadRoutes');
-const { login, authUser } = require('./controller/globalController');
+const { login, authUser, updateProfile, forgotPassword, resetPassword, verifyOtp } = require('./controller/globalController');
 const { jwtAuth } = require('./middleware/jwtAuth');
 const multer = require('./middleware/multer')
 
@@ -66,4 +67,10 @@ app.use('/api/teamlead', teamleadRouter);
 
 app.post('/api', login);
 app.get('/api/details', jwtAuth,multer.upload.single("profilePic"), authUser);
+app.patch("/api/update-profile",jwtAuth,multer.upload.single("profilePic"),updateProfile)
 
+app.post('/api/forgot-password',forgotPassword)
+
+
+app.post('/api/verify-otp',verifyOtp)
+app.post('/api/reset-password',resetPassword)

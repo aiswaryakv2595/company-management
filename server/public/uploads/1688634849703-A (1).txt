@@ -1,0 +1,20 @@
+~ db.classes.aggregate([
+
+{
+$lookup: {
+from: "members",
+localField: "enrollmentlist",
+foreignField: "name",
+as: "enrollment_details"
+}
+h
+{
+$match: {
+$expr: {
+$eq: [
+{ $size: "$enrollmentlist" },
+{ $size: "$enrollment_details" }
+1
+}
+}
+}

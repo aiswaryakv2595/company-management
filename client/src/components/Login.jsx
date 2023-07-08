@@ -12,42 +12,10 @@ import {
 import { api } from '../redux/api/api';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-  },
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  paper: {
-    padding: theme.spacing(4),
-    maxWidth: 400,
-    width: '100%',
-  },
-  textField: {
-    marginBottom: theme.spacing(2),
-  },
-  loginButton: {
-    backgroundImage: 'linear-gradient(to right, #000428, #004E92)',
-    color: theme.palette.common.white,
-    '&:hover': {
-      background: '#004E92',
-    },
-  },
-  forgotPassword: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginBottom: theme.spacing(2),
-    textDecoration: 'none',
-    color: theme.palette.text.secondary,
-  },
-}));
+import { useNavigate,Link } from 'react-router-dom';
+import { useStyles } from '../styles/useStyles';
+
+
 
 const LoginForm = () => {
   const classes = useStyles();
@@ -133,9 +101,9 @@ const LoginForm = () => {
               onChange={handleChange}
               value={inputs.password}
             />
-            <a href="#" className={classes.forgotPassword}>
-              Forgot Password
-            </a>
+           <Link to="/forgot-password" className={classes.forgotPassword}>
+            Forgot Password
+            </Link>
             <Button
               className={classes.loginButton}
               variant="contained"

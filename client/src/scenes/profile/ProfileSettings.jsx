@@ -13,8 +13,8 @@ import {
   
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import Header from "../../../components/Header";
-import { api } from "../../../redux/api/api";
+import Header from "../../components/Header";
+import { api } from "../../redux/api/api";
 import { useDispatch, useSelector } from "react-redux";
 import {PhotoCamera} from '@mui/icons-material';
 import "react-datepicker/dist/react-datepicker.css";
@@ -102,7 +102,7 @@ const ProfileSettings = () => {
       }
       
 
-      const response = await api.patch("/employee/update-profile", formData, {
+      const response = await api.patch("/update-profile", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

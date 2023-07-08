@@ -7,6 +7,7 @@ const {
   departmentDetails,
   addDepartment,
   searchEmployee,
+  employeeStatus,
 } = require("../controller/adminController");
 const { jwtAuth } = require("../middleware/jwtAuth");
 const {
@@ -24,6 +25,7 @@ adminRouter.post("/department", jwtAuth, addDepartment);
 
 adminRouter.get("/employees", jwtAuth, employeeDetails);
 adminRouter.post("/addemployees", jwtAuth, addEmployees);
+adminRouter.patch("/employee-status",jwtAuth,employeeStatus)
 adminRouter.post("/search",jwtAuth,searchEmployee)
 
 adminRouter.get("/project", jwtAuth, viewAllProject);

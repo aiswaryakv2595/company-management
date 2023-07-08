@@ -1,3 +1,6 @@
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { api } from "../../../redux/api/api";
 import {
   Box,
   Button,
@@ -16,23 +19,19 @@ import {
   useTheme,
 } from "@mui/material";
 import { saveAs } from "file-saver";
-import React, { useEffect, useState } from "react";
-import Header from "../../../components/Header";
-import { useSelector } from "react-redux";
-import { api } from "../../../redux/api/api";
 import {
   AttachmentOutlined,
   Diversity3,
   EditCalendar,
 } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
+import Header from "../../../components/Header";
 
 const AllProjects = () => {
   const [openModal, setOpenModal] = useState(false);
   const isMobile = useMediaQuery("(max-width: 600px)");
   const [project, setProject] = useState([]);
   const [employees, setEmployees] = useState([]);
-  //for edit in project icon
 
   const navigate = useNavigate();
 
@@ -77,10 +76,10 @@ const AllProjects = () => {
         });
 
         const data = response.data.project;
-        console.log("data------", data);
+       
         setProject(data);
       } catch (error) {
-        console.log("Error fetching user details:", error);
+        console.log("Error fetching project details:", error);
       }
     };
     const fetchEmployeeDetails = async () => {
@@ -91,14 +90,13 @@ const AllProjects = () => {
           },
         });
 
-        const data = response.data.employee;
-        console.log("employees data------", response.data);
+        const data = response.data.employees;
+        
         setEmployees(data);
       } catch (error) {
         console.log("Error fetching employee details:", error);
       }
     };
-    //add employees
 
     if (isLoggedIn) {
       fetchProjectDetails();
@@ -124,12 +122,11 @@ const AllProjects = () => {
       const response = await api.post("/admin/addproject", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data", // Add this header for file upload
+          "Content-Type": "multipart/form-data",
         },
       });
 
       const newProject = response.data.project;
-      console.log("project-----", response.data);
       setProject((prevProjects) => [...prevProjects, newProject]);
       setOpenModal(false);
     } catch (error) {
@@ -141,7 +138,6 @@ const AllProjects = () => {
       attachmentUrl.lastIndexOf("/") + 1
     );
     const extension = filename.substring(filename.lastIndexOf(".") + 1);
-    console.log("file name======", filename);
     fetch(attachmentUrl)
       .then((response) => response.blob())
       .then((blob) => {
@@ -167,9 +163,9 @@ const AllProjects = () => {
           + Add Project
         </Button>
       </Box>
-      {project.length > 0 ? (
+      {project && project.length > 0 ? (
         <Box mt="20px" display="flex" flexWrap="wrap" gap={2}>
-          {project.map((prj) => (
+          {project?.map((prj) => (
             <Card
               key={prj._id}
               sx={{
@@ -297,8 +293,7 @@ const AllProjects = () => {
             </Card>
           ))}
         </Box>
-      ) : null}
-
+      ) : <Box>no data</Box>}
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
         {/* Modal Content */}
         <div
@@ -362,7 +357,7 @@ const AllProjects = () => {
               name="assigned_to"
               select
             >
-              {employees.map((employee) => (
+              {employees?.map((employee) => (
                 <MenuItem key={employee._id} value={employee._id}>
                   {employee.first_name}
                 </MenuItem>

@@ -27,7 +27,11 @@ const employeeSchema = new mongoose.Schema({
   end_date: Date,
   address: String,
   profilePic: String,
-  role: String
+  role: String,
+  isActive:{
+    type:Boolean,
+    default:true
+  }
 });
 
 // Pre-save middleware to generate emp_id

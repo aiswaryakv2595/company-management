@@ -13,6 +13,8 @@ import {
   Grid,
   useTheme,
 } from "@mui/material";
+import BlockIcon from "@mui/icons-material/Block";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { useSelector } from "react-redux";
 import { api } from "../../../redux/api/api";
 import Header from "../../../components/Header";
@@ -36,10 +38,10 @@ const AllEmployees = () => {
     role: "",
   });
   const [searchInputs, setSearchInputs] = useState({
-    emp_id:"",
+    emp_id: "",
     employeeName: "",
     designation: "",
-  })
+  });
   const handleChange = (e) => {
     setInputs((prev) => ({
       ...prev,
@@ -53,9 +55,25 @@ const AllEmployees = () => {
       [e.target.name]: e.target.value,
     }));
   };
-  
+
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   const theme = useTheme();
+  const fetchUserDetails = async (token) => {
+    try {
+      const response = await api.get("/admin/employees", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = response.data.employees;
+
+      setEmployee(data);
+    } catch (error) {
+      console.log("Error fetching user details:", error);
+    }
+  };
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -63,21 +81,7 @@ const AllEmployees = () => {
       console.log("Token is null or undefined");
       return;
     }
-    const fetchUserDetails = async () => {
-      try {
-        const response = await api.get("/admin/employees", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
 
-        const data = response.data.employees;
-       
-        setEmployee(data);
-      } catch (error) {
-        console.log("Error fetching user details:", error);
-      }
-    };
     const fetchDepartment = async () => {
       try {
         const response = await api.get("/admin/department", {
@@ -92,11 +96,10 @@ const AllEmployees = () => {
     };
 
     if (isLoggedIn) {
-      fetchUserDetails();
+      fetchUserDetails(token);
       fetchDepartment();
     }
   }, [isLoggedIn]);
-
   //add user
 
   const handleAddEmployee = async () => {
@@ -136,26 +139,57 @@ const AllEmployees = () => {
   const handleSearchEmployee = async () => {
     try {
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         console.log("Token is null or undefined");
         return;
       }
-  console.log('searchInputs',searchInputs)
+      console.log("searchInputs", searchInputs);
       const response = await api.post("/admin/search", searchInputs, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       const search = response.data.search;
       console.log("search Employee:", search);
-  
+
       setEmployee(search);
     } catch (error) {
       console.log("Error searching employee:", error);
     }
   };
+  const handleBlock = async (employeeId) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        console.log("Token is null or undefined");
+        return;
+      }
+  
+      const response = await api.patch(
+        "/admin/employee-status",
+        { id: employeeId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const updatedEmployee = response.data.employee;
+      console.log("Updated Employee:", updatedEmployee);
+  
+      
+      fetchUserDetails(token);
+    } catch (error) {
+      console.log("Error updating employee status:", error);
+    }
+  };
+  
+  
+  
   
 
   return (
@@ -240,23 +274,27 @@ const AllEmployees = () => {
         >
           {employee.map((emp) => (
             <Card key={emp._id} sx={{ maxWidth: 245 }}>
-              <CardMedia
-                sx={{
-                  height: 140,
-                  width: 140,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: "50%",
-                  objectFit: "cover", // add this property
-                }}
-                image={
-                  `http://localhost:5000/dp/${emp.profilePic}` ||
-                  "/placeholder.png"
-                }
-                title="Profile Picture"
-              />
-
+              <Box
+                sx={{ display: "flex", justifyContent: "flex-end" }}
+                onClick={() => handleBlock(emp._id)}
+              >
+                {emp.isActive ? <BlockIcon /> : <TaskAltIcon />}
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <CardMedia
+                  sx={{
+                    height: 150,
+                    width: 150,
+                    borderRadius: "50%",
+                    objectFit: "cover", // add this property
+                  }}
+                  image={
+                    `http://localhost:5000/dp/${emp.profilePic}` ||
+                    "/placeholder.png"
+                  }
+                  title="Profile Picture"
+                />
+              </Box>
               <CardContent>
                 <Typography
                   gutterBottom

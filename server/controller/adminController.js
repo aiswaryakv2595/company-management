@@ -160,6 +160,27 @@ const addEmployees = async (req, res) => {
     res.status(500).json({ message: "Unable to register employee" });
   }
 };
+//employee status
+const employeeStatus = async (req,res) => {
+  try {
+    const {id} = req.body
+    console.log(req.body)
+    const employee = await Employee.findById({_id:id})
+    let updateStatus
+    if(employee.isActive){
+      updateStatus = false
+    }
+    else{
+      updateStatus = true
+    }
+    await Employee.findByIdAndUpdate({_id:id},{
+      $set:{isActive:updateStatus}
+    })
+   res.status(200).json({employee})
+  } catch (error) {
+    res.status(500).json({message:"Something went wrong"})
+  }
+}
 //search
 const searchEmployee = async (req, res) => {
   try {
@@ -220,4 +241,5 @@ module.exports = {
   employeeDetails,
   addEmployees,
   searchEmployee,
+  employeeStatus
 };
