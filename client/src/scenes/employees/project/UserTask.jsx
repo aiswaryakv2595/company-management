@@ -6,10 +6,6 @@ import {
   Card,
   CardContent,
   Box,
-  TextField,
-  Modal,
-  Button,
-  MenuItem,
   LinearProgress,
   Avatar,
 } from "@mui/material";
@@ -20,58 +16,19 @@ import Header from "../../../components/Header";
 import { api } from "../../../redux/api/api";
 import { useSelector } from "react-redux";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { adminApi, teamleadApi } from "../../../redux/api/employeeApi";
+import { employeeApi, teamleadApi } from "../../../redux/api/employeeApi";
 
-const AddTask = () => {
+const UserTask = () => {
   const [tasks, setTasks] = useState([]);
   const [project, setProject] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [inputs, setInputs] = useState({
-    title: "",
-    description: "",
-    starting_date: "",
-    due_date: "",
-    assigned_to: "",
-    priority: "",
-  });
-  const handleChange = (e) => {
-    setInputs((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
 
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   useEffect(() => {
-    // Simulating API fetch
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.log("Token is null or undefined");
-      return;
-    }
-    const fetchEmployeeDetails = async () => {
-      try {
-        // const response = await api.get("/admin/employees", {
-        //   headers: {
-        //     Authorization: `Bearer ${token}`,
-        //   },
-        // });
-
-        const response = await adminApi.allEmployees();
-        const data = response.employees;
-  
-
-        setEmployees(data);
-      } catch (error) {
-        console.log("Error fetching employee details:", error);
-      }
-    };
-
+   
     const fetchProjectDetails = async () => {
       try {
-       
-        const response = await teamleadApi.getTeamleadProject()
+      
+        const response = await employeeApi.getEmployeeProject()
 
         const data = response.project;
         setProject(data);
@@ -84,41 +41,22 @@ const AddTask = () => {
       try {
         const projectId = new URLSearchParams(window.location.search).get("id");
         if (!projectId) {
-          return;
+          return; 
         }
 
-        const response = await teamleadApi.singleProjectLead(projectId);
+       
+        const response = await employeeApi.getEmployeeTask(projectId)
 
         const sampleTasks = response.task;
+        console.log("task----", sampleTasks);
         setTasks(sampleTasks);
       } catch (error) {
         console.log("Error fetching tasks:", error);
       }
     };
     fetchProjectDetails();
-    fetchEmployeeDetails();
     fetchTasks();
   }, [isLoggedIn]);
-  const handleAddTask = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
-      const projectId = new URLSearchParams(window.location.search).get("id");
-
-      const response = await teamleadApi.addTask(inputs, projectId);
-
-      const newTask = response.task;
-      console.log("task", newTask);
-      setTasks(newTask);
-      toast.success("Task Added successfully");
-      setIsModalOpen(false);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || err.message);
-    }
-  };
 
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
@@ -137,13 +75,18 @@ const AddTask = () => {
     setTasks(updatedTasks);
     console.log("movedTask", movedTask.status);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("Token is null or undefined");
+        return;
+      }
+
       const response = await teamleadApi.updateTask({
         task_id: movedTask._id,
         status: movedTask.status,
       });
 
       toast.success(`Moved to ${movedTask.status}`);
-      
     } catch (error) {
       console.log("Error updating task status:", error);
     }
@@ -152,16 +95,22 @@ const AddTask = () => {
   return (
     <Box m="1.5rem 2.5rem">
       {tasks.length > 0 && (
-        <Header title={project.project_name} subtitle="Task Details" />
+        <Header title={project[0].project_name} subtitle="Task Details" />
       )}
+
+      <Typography variant="h6" component="h2">
+        Team Lead :
+        {project.map((prj)=>(
+          prj.assigned_to.first_name
+        ))}
+       
+      </Typography>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">To Do</Typography>
-              <Button variant="contained" onClick={() => setIsModalOpen(true)}>
-                Add Task
-              </Button>
+
               <Droppable droppableId="column-todo">
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps}>
@@ -464,99 +413,8 @@ const AddTask = () => {
           </Grid>
         </Grid>
       </DragDropContext>
-      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            outline: "none",
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Add Task
-          </Typography>
-          <TextField
-            label="Task Name"
-            value={inputs.title}
-            name="title"
-            onChange={handleChange}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Starting Time"
-                type="date"
-                name="starting_date"
-                value={inputs.starting_date}
-                onChange={handleChange}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Deadline"
-                type="date"
-                name="due_date"
-                value={inputs.due_date}
-                onChange={handleChange}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-          <TextField
-            label="Assigned to"
-            name="assigned_to"
-            value={inputs.assigned_to}
-            onChange={handleChange}
-            fullWidth
-            select
-            sx={{ mb: 2 }}
-          >
-            {employees?.map((employee) => (
-              <MenuItem key={employee._id} value={employee._id}>
-                {employee.first_name + " " + employee.last_name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            label="Description"
-            value={inputs.description}
-            onChange={handleChange}
-            fullWidth
-            multiline
-            name="description"
-            rows={4}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Priority"
-            value={inputs.priority}
-            onChange={handleChange}
-            fullWidth
-            name="priority"
-            sx={{ mb: 2 }}
-          />
-          <Button variant="contained" onClick={handleAddTask}>
-            Add
-          </Button>
-        </Box>
-      </Modal>
     </Box>
   );
 };
 
-export default AddTask;
+export default UserTask;

@@ -16,8 +16,8 @@ import {
 import BlockIcon from "@mui/icons-material/Block";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { useSelector } from "react-redux";
-import { api } from "../../../redux/api/api";
 import Header from "../../../components/Header";
+import { adminApi } from "../../../redux/api/employeeApi";
 
 const AllEmployees = () => {
   const isMobile = useMediaQuery("(min-width:1000px)");
@@ -36,6 +36,7 @@ const AllEmployees = () => {
     gender: "",
     age: "",
     role: "",
+    tl_id: "",
   });
   const [searchInputs, setSearchInputs] = useState({
     emp_id: "",
@@ -58,45 +59,30 @@ const AllEmployees = () => {
 
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   const theme = useTheme();
-  const fetchUserDetails = async (token) => {
+  const fetchUserDetails = async () => {
     try {
-      const response = await api.get("/admin/employees", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = response.data.employees;
+      const response = await adminApi.allEmployees();
+      const data = response.employees;
 
       setEmployee(data);
     } catch (error) {
       console.log("Error fetching user details:", error);
     }
   };
-  
-  useEffect(() => {
-    const token = localStorage.getItem("token");
 
-    if (!token) {
-      console.log("Token is null or undefined");
-      return;
-    }
+  useEffect(() => {
+    
 
     const fetchDepartment = async () => {
       try {
-        const response = await api.get("/admin/department", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = response.data.department;
-        console.log("department------", data);
+        const response = await adminApi.getDepartment();
+        const data = response.department;
         setDepartment(data);
       } catch (error) {}
     };
 
     if (isLoggedIn) {
-      fetchUserDetails(token);
+      fetchUserDetails();
       fetchDepartment();
     }
   }, [isLoggedIn]);
@@ -104,30 +90,15 @@ const AllEmployees = () => {
 
   const handleAddEmployee = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const response = await adminApi.addEmployee(inputs);
 
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
-
-      const response = await api.post("/admin/addemployees", inputs, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const newEmployee = response.data.employee;
+      const newEmployee = response.employee;
       console.log("New Employee:", newEmployee);
 
       // Fetch the updated employee list
-      const updatedResponse = await api.get("/admin/employees", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const updatedResponse = await adminApi.allEmployees();
 
-      const updatedData = updatedResponse.data.employees;
+      const updatedData = updatedResponse.employees;
       console.log("Updated Employee List:", updatedData);
 
       setEmployee(updatedData);
@@ -144,14 +115,10 @@ const AllEmployees = () => {
         console.log("Token is null or undefined");
         return;
       }
-      console.log("searchInputs", searchInputs);
-      const response = await api.post("/admin/search", searchInputs, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      const search = response.data.search;
+      const response = await adminApi.searchEmployee(searchInputs);
+
+      const search = response.search;
       console.log("search Employee:", search);
 
       setEmployee(search);
@@ -161,36 +128,16 @@ const AllEmployees = () => {
   };
   const handleBlock = async (employeeId) => {
     try {
-      const token = localStorage.getItem("token");
-  
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
-  
-      const response = await api.patch(
-        "/admin/employee-status",
-        { id: employeeId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      const updatedEmployee = response.data.employee;
+      const response = await adminApi.blockEmployee({ id: employeeId });
+
+      const updatedEmployee = response.employee;
       console.log("Updated Employee:", updatedEmployee);
-  
-      
-      fetchUserDetails(token);
+
+      fetchUserDetails();
     } catch (error) {
       console.log("Error updating employee status:", error);
     }
   };
-  
-  
-  
-  
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -471,6 +418,23 @@ const AllEmployees = () => {
             >
               <MenuItem value="employee">Employee</MenuItem>
               <MenuItem value="teamlead">Team Lead</MenuItem>
+            </TextField>
+            <TextField
+              select
+              label="Reporting to"
+              variant="outlined"
+              value={inputs.tl_id}
+              sx={{ minWidth: 215 }}
+              onChange={handleChange}
+              name="tl_id"
+            >
+              {employee
+                ?.filter((emp) => emp.role !== "employee")
+                .map((emp) => (
+                  <MenuItem key={emp._id} value={emp._id}>
+                    {emp.first_name}
+                  </MenuItem>
+                ))}
             </TextField>
             {/* Submit Button */}
             <Button variant="contained" onClick={handleAddEmployee}>

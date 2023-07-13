@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api } from "../../../redux/api/api";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Box,
   Grid,
@@ -11,6 +12,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import "./project.css"; // Import custom CSS file
+import { adminApi, projectApi } from "../../../redux/api/employeeApi";
 
 const EditProject = () => {
   const { projectId } = useParams();
@@ -44,14 +46,9 @@ const EditProject = () => {
     }
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await api.get("/admin/employees?role=teamlead", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = response.data.employee;
-        console.log("employees data------", response.data);
+        const response = await adminApi.getTeamlead();
+        const data = response.employees;
+      
         setEmployees(data);
       } catch (error) {
         console.log("Error fetching employee details:", error);
@@ -59,14 +56,11 @@ const EditProject = () => {
     };
     const fetchProjectDetails = async () => {
       try {
-        const response = await api.get(`/admin/edit-project/${projectId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+       
+        const response = await projectApi.getSingleProject(projectId);
 
-        const data = response.data.project;
-        console.log("Project details:", response.data);
+        const data = response.project;
+        console.log("Project details:", data);
         setProject(data);
         setFormValues({
           project_name: data.project_name,
@@ -97,26 +91,13 @@ const EditProject = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Update project details using the formValues state
+   
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
 
-      const response = await api.patch(
-        `/admin/edit-project/${projectId}`,
-        formValues,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await projectApi.updateProject(projectId, formValues);
 
-      console.log("Project updated successfully:", response.data);
-      // You can redirect or show a success message here
+      console.log("Project updated successfully:", response.project);
+     toast.success("project Updated successfully")
     } catch (error) {
       console.log("Error updating project:", error);
     }

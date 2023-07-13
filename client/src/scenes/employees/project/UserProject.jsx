@@ -4,9 +4,9 @@ import Header from '../../../components/Header'
 import { useSelector } from 'react-redux';
 import { api } from '../../../redux/api/api';
 import { useNavigate } from 'react-router-dom';
-import { teamleadApi } from '../../../redux/api/employeeApi';
+import { employeeApi } from '../../../redux/api/employeeApi';
 
-const ViewProject = () => {
+const UserProject = () => {
     const [project, setProject] = useState([]);
     const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
     const navigate = useNavigate()
@@ -14,10 +14,10 @@ const ViewProject = () => {
        
         const fetchProjectDetails = async () => {
             try {
-        
-              const response = await teamleadApi.getTeamleadProject()
+            
+              const response = await employeeApi.getEmployeeProject()
               const data = response.project;
-             
+              console.log("data------", data);
               setProject(data);
             } catch (error) {
               console.log("Error fetching user details:", error);
@@ -30,7 +30,7 @@ const ViewProject = () => {
     }, [isLoggedIn])
     const handleTask = async (projectId) => {
      
-        navigate(`/teamlead/view-task?id=${projectId}`)
+        navigate(`/view-task?id=${projectId}`)
         
       
     
@@ -99,4 +99,4 @@ const ViewProject = () => {
   )
 }
 
-export default ViewProject
+export default UserProject

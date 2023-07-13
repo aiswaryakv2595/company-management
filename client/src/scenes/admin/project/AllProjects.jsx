@@ -26,6 +26,7 @@ import {
 } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header";
+import { adminApi, projectApi } from "../../../redux/api/employeeApi";
 
 const AllProjects = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -61,22 +62,12 @@ const AllProjects = () => {
   const theme = useTheme();
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.log("Token is null or undefined");
-      return;
-    }
-
     const fetchProjectDetails = async () => {
       try {
-        const response = await api.get("/admin/project", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await projectApi.getAllProject()
 
-        const data = response.data.project;
-       
+        const data = response.project;
+
         setProject(data);
       } catch (error) {
         console.log("Error fetching project details:", error);
@@ -84,14 +75,9 @@ const AllProjects = () => {
     };
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await api.get("/admin/employees?role=teamlead", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await adminApi.getTeamlead();
+        const data = response.employees;
 
-        const data = response.data.employees;
-        
         setEmployees(data);
       } catch (error) {
         console.log("Error fetching employee details:", error);
@@ -106,12 +92,7 @@ const AllProjects = () => {
 
   const handleAddProject = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
-
+     
       const formData = new FormData();
       formData.append("attachment", selectedImage, selectedImage?.name);
 
@@ -119,14 +100,9 @@ const AllProjects = () => {
         formData.append(key, value);
       });
 
-      const response = await api.post("/admin/addproject", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await projectApi.addProject(formData);
 
-      const newProject = response.data.project;
+      const newProject = response.project;
       setProject((prevProjects) => [...prevProjects, newProject]);
       setOpenModal(false);
     } catch (error) {
@@ -293,7 +269,9 @@ const AllProjects = () => {
             </Card>
           ))}
         </Box>
-      ) : <Box>no data</Box>}
+      ) : (
+        <Box>no data</Box>
+      )}
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
         {/* Modal Content */}
         <div

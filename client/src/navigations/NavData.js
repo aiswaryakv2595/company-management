@@ -56,11 +56,7 @@ export const navItems = [
         text: "All Project",
         icon: <PresentToAllOutlined />,
       },
-      {
-        route: "admin/tasks",
-        text: "All Tasks",
-        icon: <AssignmentTurnedInOutlined />,
-      },
+    
     ],
   },
   {
@@ -125,8 +121,21 @@ export const navItemsEmp = [
         text: "On Duty Listing",
         icon: <Work />,
       },
+      
     ],
   },
+  {
+    text: "Projects",
+    icon: null,
+    subItems: [
+      {
+        route: "view-project",
+        text: "All Projects",
+        icon: <WorkHistory />,
+      },
+    ],
+  },
+
   {
     text: "Time Sheet",
     icon: null,

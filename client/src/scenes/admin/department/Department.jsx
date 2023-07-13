@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../../../redux/api/api';
-import { useSelector } from 'react-redux';
-import { Box, Button, Divider, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useTheme } from '@mui/material';
-import Header from '../../../components/Header';
-import EditIcon from '@mui/icons-material/Edit';
-
-
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import "../../../index.css";
+import {
+  Box,
+  Button,
+  Divider,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import Header from "../../../components/Header";
+import EditIcon from "@mui/icons-material/Edit";
+import { adminApi } from "../../../redux/api/employeeApi";
 
 const Department = () => {
   const [department, setDepartment] = useState([]);
@@ -14,7 +28,6 @@ const Department = () => {
   const [inputs, setInputs] = useState({
     department: "",
     designation: "",
-   
   });
   const handleChange = (e) => {
     setInputs((prev) => ({
@@ -23,27 +36,17 @@ const Department = () => {
     }));
   };
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
- 
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      console.log('Token is null or undefined');
-      return;
-    }
-
     const fetchDepartment = async () => {
       try {
-        const response = await api.get('/admin/department', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = response.data.department;
-        console.log('department------', data);
+        const response = await adminApi.getDepartment();
+        console.log("Response:", response);
+        const data = response.department;
+        console.log("Department data:", data);
         setDepartment(data);
       } catch (error) {
-        // Handle error here
+        console.log(error);
       }
     };
 
@@ -54,41 +57,21 @@ const Department = () => {
 
   const handleAddDepartment = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const updatedResponse = await adminApi.addDepartment(inputs);
 
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
+      const response = await adminApi.getDepartment();
 
-      const response = await api.post("/admin/department", inputs, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const newDepartment = response.department;
 
-      const newDepartment = response.data.department;
-      console.log("new Department:", newDepartment);
-
-      // Fetch the updated employee list
-      const updatedResponse = await api.get("/admin/department", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const updatedData = updatedResponse.data.department;
-      console.log("Updated Employee List:", updatedData);
-
-      setDepartment(updatedData);
+      setDepartment(newDepartment);
       setOpenModal(false);
     } catch (error) {
       console.log("Error adding department:", error);
     }
   };
 
-  const headers = ['Department', 'Designation'];
- 
+  const headers = ["Department", "Designation"];
+
   return (
     <Box m="1.5rem 2.5rem">
       <Header title="Department" subtitle="List of Department" />
@@ -105,82 +88,98 @@ const Department = () => {
         </Button>
       </Box>
       <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-      <TableHead>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
             <TableRow>
               <TableCell>Sl No </TableCell>
               {headers.map((header) => (
-                <TableCell align="center">
-                  {header}
-                </TableCell>
+                <TableCell align="center">{header}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {department.map((dept,index) =>(
-               <TableRow
-               key={dept.department}
-               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-             >
-              <TableCell component="th" scope="dept">
-                  {index+1}
+            {department.map((dept, index) => (
+              <TableRow
+                key={dept._id}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell component="th" scope="dept">
+                  {index + 1}
                 </TableCell>
-                <TableCell align="center">{dept.department}</TableCell>
-                <TableCell align="center">
+                <TableCell
+                  align="center"
+                  className={
+                    dept.department.length > 100 ? "department-input" : ""
+                  }
+                  title={dept.department}
+                >
+                  {dept.department}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  className={
+                    dept.designation.length > 100 ? "department-input" : ""
+                  }
+                  title={dept.designation}
+                >
                   {dept.designation}
                 </TableCell>
                 <TableCell align="center">
-                <EditIcon/>
+                  <EditIcon />
                 </TableCell>
-               
-                
-             </TableRow>
+              </TableRow>
             ))}
           </TableBody>
-      </Table>
+        </Table>
       </TableContainer>
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
-      <div
+        <div
           style={{
             position: "absolute",
             top: "50%",
             left: "50%",
-            width:"30%",
+            width: "30%",
             transform: "translate(-50%, -50%)",
             background: "#ffffff",
             padding: "20px",
             outline: "none",
           }}
         >
-      <Typography variant="h6" component="h2" gutterBottom>
+          <Typography variant="h6" component="h2" gutterBottom>
             Add Department
           </Typography>
-         
+
           <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <Divider sx={{border:1}} />
-          <TextField
-                  label="Department"
-                  name="department"
-                  value={inputs.department}
-                  onChange={handleChange}
-                  fullWidth
-                />
-                 <TextField
-                  label="Designation"
-                  name="designation"
-                  value={inputs.designation}
-                  onChange={handleChange}
-                  fullWidth
-                />
-                 <Button variant="contained" onClick={handleAddDepartment}>
-                  Submit
-                 </Button>
+            <Divider sx={{ border: 1 }} />
+            <TextField
+              label="Department"
+              name="department"
+              value={inputs.department}
+              onChange={handleChange}
+              fullWidth
+              className={
+                inputs.department.length > 100 ? "department-input" : ""
+              }
+              data-full={inputs.department}
+            />
+            <TextField
+              label="Designation"
+              name="designation"
+              value={inputs.designation}
+              onChange={handleChange}
+              className={
+                inputs.designation.length > 100 ? "department-input" : ""
+              }
+              data-full={inputs.designation}
+              fullWidth
+            />
+            <Button variant="contained" onClick={handleAddDepartment}>
+              Submit
+            </Button>
           </Box>
-          </div>
-        </Modal>
-     
+        </div>
+      </Modal>
     </Box>
-    
   );
 };
 

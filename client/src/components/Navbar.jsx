@@ -23,6 +23,7 @@ import { setMode } from "../redux/slices/themeSlice";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { api } from "../redux/api/api";
+import { adminApi, employeeApi } from "../redux/api/employeeApi";
 
 function Navbar({ isSidebarOpen, setIsSidebarOpen, showBackground }) {
   const dispatch = useDispatch();
@@ -49,21 +50,10 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen, showBackground }) {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          console.log("Token is null or undefined");
-          return;
-        }
-
-        const response = await api.get("/details", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = response.data.employee;
-
+      
+        const response = await adminApi.userDetails()
+        const data = response.employee;
+console.log('navbar ',response)
         setEmployee(data);
       } catch (error) {
         console.log("Error fetching user details:", error);

@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 const login = async (req, res) => {
     try {
       const { email, password } = req.body;
-      const employee = await Employee.findOne({ email: email });
+      const employee = await Employee.findOne({ email: email,isActive:true });
       if (!employee) {
         return res.status(404).json({ message: "Employee not found." });
       }
@@ -13,11 +13,11 @@ const login = async (req, res) => {
       if (!isPasswordValid) {
         return res.status(401).json({ message: "Invalid password." });
       }
-      // Generate a JWT token
+     
       const token = jwt.sign(
         { empId: employee._id, email: employee.email,role:employee.role },
         process.env.JWT_ADMIN,
-        { expiresIn: "1d" } // Token expiration time
+        { expiresIn: "1d" } 
       );
       res.status(200).json({ token: token, role: employee.role });
     } catch (error) {
@@ -33,6 +33,7 @@ const login = async (req, res) => {
     console.log("employee", employee);
     await employee.populate('designation');
     const designation = employee.designation;
+    console.log(employee)
     res.status(200).json({ employee: employee, designation: designation });
   };
   const updateProfile = async (req,res) => {
@@ -41,7 +42,7 @@ const login = async (req, res) => {
       const profilePic = req.file
       const id = req.employee._id;
       const profile = await Employee.findOneAndUpdate(
-        { _id: id }, // Replace 'your-profile-id' with the actual ID
+        { _id: id }, 
         {
           phone,
           email,

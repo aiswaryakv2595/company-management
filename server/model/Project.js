@@ -18,6 +18,23 @@ const projectSchema = new mongoose.Schema({
     status:{
         type:String,
         default:'progress'
+    },
+    task:[
+        {
+        title:String,
+        description:String,
+        starting_date:String,
+        due_date:String,
+        assigned_to:{
+            type:mongoose.Types.ObjectId,
+            ref:'Employee',
+            
+        },
+        status:{
+            type:String
+        },
+        priority:String
     }
+],
 })
 module.exports = mongoose.model('Project', projectSchema);

@@ -1,11 +1,12 @@
 const Employee = require("../model/Employee");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Project = require("../model/Project");
 
 const employeeLogin = async (req, res) => {
     try {
       const { email, password } = req.body;
-      const employee = await Employee.findOne({ email: email, role: "employee" });
+      const employee = await Employee.findOne({ email: email, role: "employee",isActive:true });
       if (!employee) {
         return res.status(404).json({ message: "Employee not found." });
       }
@@ -27,34 +28,38 @@ const employeeLogin = async (req, res) => {
         .json({ message: "An error occurred while logging in admin." });
     }
   };
-  // const updateProfile = async (req,res) => {
-  //   try {
-  //     const { phone, email, dob, gender, address } = req.body;
-  //     const profilePic = req.file
-  //     const id = req.employee._id;
-  //     const profile = await Employee.findOneAndUpdate(
-  //       { _id: id }, // Replace 'your-profile-id' with the actual ID
-  //       {
-  //         phone,
-  //         email,
-  //         dob,
-  //         gender,
-  //         address,
-  //         profilePic: profilePic ? profilePic.filename : undefined,
-  //       },
-  //     );
-  //     if (!profile) {
-  //       return res.status(404).json({ message: 'Profile not found' });
-  //     }
-  
-  //     res.status(200).json({ message: 'Profile updated successfully', profile });
-      
-  //   } catch (error) {
-  //     console.error('Error updating profile:', error);
-  //   res.status(500).json({ message: 'Internal server error' });
-  //   }
-  // }
+ const employeeProject = async (req,res) => {
+  try {
+    const employee = req.employee;
+    const project = await Project.find({ "task.assigned_to": employee._id }).populate(
+      "assigned_to task.assigned_to"
+    );
+    if (project) {
+      res.status(200).json({ project });
+    } else {
+      res.status(404).json({ message: "Project not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+ }
+ const employeeTask = async (req,res) => {
+  try {
+    const id = req.query.id;
+    const project = await Project.findById(id).populate('assigned_to task.assigned_to');
+    
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    const task = project.task;
+    res.status(200).json({ task });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+ }
   module.exports = {
     employeeLogin,
-    // updateProfile
+    employeeProject,
+    employeeTask
   }

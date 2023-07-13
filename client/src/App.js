@@ -26,6 +26,8 @@ import ForgotPassword from './scenes/password/ForgotPassword';
 import OtpPage from './scenes/password/OtpPage';
 import ResetPassword from './scenes/password/ResetPassword';
 import AddTask from './scenes/teamlead/project/AddTask';
+import UserProject from './scenes/employees/project/UserProject';
+import UserTask from './scenes/employees/project/UserTask';
 
 
 
@@ -59,6 +61,8 @@ function App() {
           <Route element = {<EmployeeLayout/>}>
           <Route path='/dashboard' element={<EmpDashboard/>}/>
           <Route path='/profile' element={<ProfileSettings/>}/>
+          <Route path='/view-project' element={<UserProject/>}/>
+          <Route path='/view-task' element={<UserTask/>}/>
           </Route>
           </Route>
           {/* teamlead routes */}
@@ -67,7 +71,7 @@ function App() {
           <Route path='/teamlead/profile' element={<ProfileSettings/>}/>
           <Route path='/teamlead/dashboard' element={<LeadDashboard/>}/>
           <Route path='/teamlead/view-project' element={<ViewProject/>}/>
-          <Route path='/teamlead/view-tasks' element={<AddTask/>}/>
+          <Route path='/teamlead/view-task' element={<AddTask/>}/>
           </Route>
           </Route>
         </Routes>

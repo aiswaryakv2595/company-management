@@ -1,9 +1,9 @@
 const express = require('express')
 const { jwtAuth } = require('../middleware/jwtAuth')
-const { updateProfile } = require('../controller/employeeController')
+const { employeeProject, employeeTask } = require('../controller/employeeController')
 const multer = require("../middleware/multer");
 const employeeRouter = express.Router()
-
-// employeeRouter.patch("/update-profile",jwtAuth,multer.upload.single("profilePic"),updateProfile)
+ employeeRouter.get('/view-project',jwtAuth,employeeProject)
+ employeeRouter.get('/view-task',jwtAuth,employeeTask)
 
 module.exports = employeeRouter

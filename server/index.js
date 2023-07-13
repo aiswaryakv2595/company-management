@@ -59,7 +59,8 @@ const employeeRouter = require('./routes/employeeRoute');
 const teamleadRouter = require('./routes/teamleadRoutes');
 const { login, authUser, updateProfile, forgotPassword, resetPassword, verifyOtp } = require('./controller/globalController');
 const { jwtAuth } = require('./middleware/jwtAuth');
-const multer = require('./middleware/multer')
+const multer = require('./middleware/multer');
+const { updateStatus } = require('./controller/projectController');
 
 app.use('/api/admin', adminRouter);
 app.use('/api/employee', employeeRouter);
@@ -74,3 +75,5 @@ app.post('/api/forgot-password',forgotPassword)
 
 app.post('/api/verify-otp',verifyOtp)
 app.post('/api/reset-password',resetPassword)
+
+app.post('/api/update-task-status',jwtAuth,updateStatus)

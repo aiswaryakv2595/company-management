@@ -128,6 +128,7 @@ const addEmployees = async (req, res) => {
       designation,
       gender,
       role,
+      tl_id
     } = req.body;
     const existingEmployee = await Employee.findOne({
       email: email,
@@ -152,6 +153,7 @@ const addEmployees = async (req, res) => {
       dob: dob,
       age: age,
       role: role,
+      tl_id:tl_id
     });
     await employee.save();
     res.status(201).json({ message: "Employee added successfully" });

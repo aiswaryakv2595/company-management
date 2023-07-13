@@ -33,18 +33,7 @@ const Sidebar = ({
   const [expandedItems, setExpandedItems] = useState([]);
   const navigate = useNavigate();
   const theme = useTheme();
-  const getSidebarBackground = () => {
-    if (userRole === "admin") {
-      return "#34444C";
-    } else if (userRole === "employee") {
-      return "#004E92";
-    } else if (userRole === "teamlead") {
-      return "#212a3e";
-    }
-    // Add more conditions for other user roles if needed
-    return "";
-  };
-
+ 
   useEffect(() => {
     setActive(pathname.substring(1));
   }, [pathname]);
@@ -86,7 +75,7 @@ const Sidebar = ({
                 <FlexBetween color={theme.palette.secondary.main}>
                   <Box display="flex" alignItems="center" gap="1rem">
                     <Typography variant="h4" fontWeight="bold">
-                      CMS
+                      Strategix
                     </Typography>
                   </Box>
                   {!isNonMobile && (

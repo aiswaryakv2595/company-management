@@ -8,3 +8,25 @@ body,
   width: 100%;
   font-family: "Inter",sans-serif;
 }
+.department-input[title] {
+  position: relative;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.department-input[title]::after {
+  content: attr(title);
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  white-space: normal;
+  background-color: #000;
+  color: #fff;
+  padding: 0.5rem;
+  z-index: 1;
+  max-width: 400px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
