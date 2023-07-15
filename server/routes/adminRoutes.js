@@ -8,6 +8,7 @@ const {
   addDepartment,
   searchEmployee,
   employeeStatus,
+  updateDepartment,
 } = require("../controller/adminController");
 const { jwtAuth } = require("../middleware/jwtAuth");
 const {
@@ -22,7 +23,7 @@ const adminRouter = express.Router();
 adminRouter.post("/signup", adminSignup);
 adminRouter.get("/department", jwtAuth, departmentDetails);
 adminRouter.post("/department", jwtAuth, addDepartment);
-
+adminRouter.patch("/department", jwtAuth, updateDepartment);
 adminRouter.get("/employees", jwtAuth, employeeDetails);
 adminRouter.post("/addemployees", jwtAuth, addEmployees);
 adminRouter.patch("/employee-status",jwtAuth,employeeStatus)

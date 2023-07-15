@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Button,
   Typography,
-  CardMedia,
   useMediaQuery,
   TextField,
   MenuItem,
@@ -13,8 +10,9 @@ import {
   Grid,
   useTheme,
 } from "@mui/material";
-import BlockIcon from "@mui/icons-material/Block";
-import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import { DataGrid } from "@mui/x-data-grid";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import Header from "../../../components/Header";
 import { adminApi } from "../../../redux/api/employeeApi";
@@ -43,6 +41,62 @@ const AllEmployees = () => {
     employeeName: "",
     designation: "",
   });
+  //error handling
+  const [isFirstNameValid, setFirstNameValid] = useState(true);
+  const [isLastNameValid, setLastNameValid] = useState(true);
+  const [isEmailValid, setEmailValid] = useState(true);
+  const [isPasswordValid, setPasswordValid] = useState(true);
+  const [isPhoneValid, setPhoneValid] = useState(true);
+  // Columns configuration
+  const columns = [
+    { field: "emp_id", headerName: "ID", width: 80 },
+    { field: "first_name", headerName: "First Name", width: 100 },
+    { field: "last_name", headerName: "Last Name", width: 100 },
+    { field: "email", headerName: "Email", width: 200 },
+    {
+      field: "designation",
+      headerName: "Designation",
+      width: 200,
+      valueGetter: (params) => params.row.department[0].designation,
+    },
+    { field: "role", headerName: "Role", width: 100 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 130,
+      renderCell: (params) => (
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end" }}
+          onClick={() => handleBlock(params.row._id)}
+        >
+          {params.row.isActive ? (
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: theme.palette.primary[50],
+                color: theme.palette.secondary[1000],
+              }}
+            >
+              BLOCK
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: theme.palette.primary[50],
+                color: theme.palette.secondary[1000],
+              }}
+            >
+              UNBLOCK
+            </Button>
+          )}
+        </Box>
+      ),
+    },
+  ];
+
+  // Rest of the component code...
+
   const handleChange = (e) => {
     setInputs((prev) => ({
       ...prev,
@@ -63,7 +117,7 @@ const AllEmployees = () => {
     try {
       const response = await adminApi.allEmployees();
       const data = response.employees;
-
+      console.log("employee", data);
       setEmployee(data);
     } catch (error) {
       console.log("Error fetching user details:", error);
@@ -71,8 +125,6 @@ const AllEmployees = () => {
   };
 
   useEffect(() => {
-    
-
     const fetchDepartment = async () => {
       try {
         const response = await adminApi.getDepartment();
@@ -90,23 +142,70 @@ const AllEmployees = () => {
 
   const handleAddEmployee = async () => {
     try {
-      const response = await adminApi.addEmployee(inputs);
+      let isValid = true;
 
-      const newEmployee = response.employee;
-      console.log("New Employee:", newEmployee);
+      // Validate first name
+      if (!inputs.first_name || inputs.first_name.trim() === "") {
+        setFirstNameValid(false);
+        isValid = false;
+      } else {
+        setFirstNameValid(true);
+      }
 
-      // Fetch the updated employee list
-      const updatedResponse = await adminApi.allEmployees();
+      // Validate last name
+      if (!inputs.last_name || inputs.last_name.trim() === "") {
+        setLastNameValid(false);
+        isValid = false;
+      } else {
+        setLastNameValid(true);
+      }
 
-      const updatedData = updatedResponse.employees;
-      console.log("Updated Employee List:", updatedData);
+      // Validate email
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!inputs.email || !emailPattern.test(inputs.email)) {
+        setEmailValid(false);
+        isValid = false;
+      } else {
+        setEmailValid(true);
+      }
 
-      setEmployee(updatedData);
-      setOpenModal(false);
+      // Validate password
+      if (!inputs.password || inputs.password.length < 8) {
+        setPasswordValid(false);
+        isValid = false;
+      } else {
+        setPasswordValid(true);
+      }
+
+      // Validate phone
+      if (!inputs.phone || inputs.phone.trim() === "") {
+        setPhoneValid(false);
+        isValid = false;
+      } else {
+        setPhoneValid(true);
+      }
+
+      if (isValid) {
+        const response = await adminApi.addEmployee(inputs);
+
+        const newEmployee = response.employee;
+        console.log("New Employee:", newEmployee);
+
+        // Fetch the updated employee list
+        const updatedResponse = await adminApi.allEmployees();
+
+        const updatedData = updatedResponse.employees;
+        console.log("Updated Employee List:", updatedData);
+
+        setEmployee(updatedData);
+        toast.success("Employee added successfully");
+        setOpenModal(false);
+      }
     } catch (error) {
       console.log("Error adding employee:", error);
     }
   };
+
   const handleSearchEmployee = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -131,7 +230,9 @@ const AllEmployees = () => {
       const response = await adminApi.blockEmployee({ id: employeeId });
 
       const updatedEmployee = response.employee;
-      console.log("Updated Employee:", updatedEmployee);
+      if (updatedEmployee.isActive)
+        toast.success(`${updatedEmployee.first_name} is Blocked`);
+      else toast.success(`${updatedEmployee.first_name} is Unblocked`);
 
       fetchUserDetails();
     } catch (error) {
@@ -156,6 +257,7 @@ const AllEmployees = () => {
       </Box>
       <Box
         display="flex"
+        flexDirection={isMobile ? "row" : "column"}
         justifyContent="flex-start"
         alignItems="center"
         flexWrap="wrap"
@@ -169,7 +271,7 @@ const AllEmployees = () => {
           name="emp_id"
           value={searchInputs.emp_id}
           onChange={handleSearch}
-          sx={{ minWidth: 200 }}
+          sx={{ minWidth: 100, mb: isMobile ? 0 : 1 }}
         />
 
         <TextField
@@ -179,7 +281,7 @@ const AllEmployees = () => {
           name="employeeName"
           value={searchInputs.employeeName}
           onChange={handleSearch}
-          sx={{ minWidth: 250 }}
+          sx={{ minWidth: 150, mb: isMobile ? 0 : 1 }}
         />
 
         <TextField
@@ -189,7 +291,7 @@ const AllEmployees = () => {
           name="designation"
           value={searchInputs.designation}
           onChange={handleSearch}
-          sx={{ minWidth: 250 }}
+          sx={{ minWidth: 250, mb: isMobile ? 0 : 1 }}
         >
           {department.map((dept) => (
             <MenuItem key={dept._id} value={dept._id}>
@@ -201,73 +303,32 @@ const AllEmployees = () => {
           variant="contained"
           color="success"
           onClick={handleSearchEmployee}
-          sx={{ padding: "10px", minWidth: 200, backgroundColor: "#f27457" }}
+          sx={{
+            padding: "10px",
+            minWidth: 200,
+            backgroundColor: "#f27457",
+            mb: isMobile ? 0 : 1,
+          }}
         >
           Search
         </Button>
       </Box>
 
       {employee.length > 0 ? (
-        <Box
-          mt="20px"
-          display="grid"
-          gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-          justifyContent="space-between"
-          rowGap="20px"
-          columnGap="1.33%"
-          sx={{
-            "& > div": { gridColumn: isMobile ? undefined : "span 4" },
-          }}
-        >
-          {employee.map((emp) => (
-            <Card key={emp._id} sx={{ maxWidth: 245 }}>
-              <Box
-                sx={{ display: "flex", justifyContent: "flex-end" }}
-                onClick={() => handleBlock(emp._id)}
-              >
-                {emp.isActive ? <BlockIcon /> : <TaskAltIcon />}
-              </Box>
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <CardMedia
-                  sx={{
-                    height: 150,
-                    width: 150,
-                    borderRadius: "50%",
-                    objectFit: "cover", // add this property
-                  }}
-                  image={
-                    `http://localhost:5000/dp/${emp.profilePic}` ||
-                    "/placeholder.png"
-                  }
-                  title="Profile Picture"
-                />
-              </Box>
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="div"
-                  sx={{ textAlign: "center" }}
-                >
-                  {emp.first_name + " " + emp.last_name}
-                </Typography>
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{ textAlign: "center" }}
-                >
-                  Employee ID : {emp.emp_id}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "center" }}
-                >
-                  {emp.department[0].designation}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
+        <Box mt="20px">
+          <DataGrid
+            rows={employee}
+            columns={columns}
+            getRowId={(row) => row._id}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 5 },
+              },
+            }}
+            autoHeight
+            checkboxSelection={false}
+            disableSelectionOnClick
+          />
         </Box>
       ) : null}
       {/* Add User Modal */}
@@ -296,6 +357,8 @@ const AllEmployees = () => {
                   name="first_name"
                   value={inputs.first_name}
                   onChange={handleChange}
+                  error={!isFirstNameValid}
+                  helperText={!isFirstNameValid && "First Name is required"}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -304,6 +367,8 @@ const AllEmployees = () => {
                   name="last_name"
                   value={inputs.last_name}
                   onChange={handleChange}
+                  error={!isLastNameValid}
+                  helperText={!isLastNameValid && "Last Name is required"}
                 />
               </Grid>
             </Grid>
@@ -315,6 +380,10 @@ const AllEmployees = () => {
                   name="email"
                   value={inputs.email}
                   onChange={handleChange}
+                  error={!isEmailValid}
+                  helperText={
+                    !isEmailValid && "Please enter a valid email address"
+                  }
                 />
               </Grid>
               <Grid item xs={6}>
@@ -324,6 +393,11 @@ const AllEmployees = () => {
                   name="password"
                   value={inputs.password}
                   onChange={handleChange}
+                  error={!isPasswordValid}
+                  helperText={
+                    !isPasswordValid &&
+                    "Password should be a minimum of 8 characters"
+                  }
                 />
               </Grid>
             </Grid>
@@ -339,6 +413,7 @@ const AllEmployees = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  required
                 />
               </Grid>
               <Grid item xs={6}>
@@ -351,6 +426,7 @@ const AllEmployees = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  required
                 />
               </Grid>
             </Grid>
@@ -362,6 +438,7 @@ const AllEmployees = () => {
                   name="age"
                   value={inputs.age}
                   onChange={handleChange}
+                  required
                 />
               </Grid>
               <Grid item xs={6}>
@@ -370,6 +447,8 @@ const AllEmployees = () => {
                   name="phone"
                   value={inputs.phone}
                   onChange={handleChange}
+                  error={!isPhoneValid}
+                  helperText={!isPhoneValid && "Phone is required"}
                 />
               </Grid>
             </Grid>
@@ -384,6 +463,7 @@ const AllEmployees = () => {
                   sx={{ minWidth: 215 }}
                   onChange={handleChange}
                   name="gender"
+                  required
                 >
                   <MenuItem value="Male">Male</MenuItem>
                   <MenuItem value="Female">Female</MenuItem>
@@ -397,6 +477,7 @@ const AllEmployees = () => {
                   value={inputs.designation}
                   fullWidth
                   onChange={handleChange}
+                  required
                 >
                   {department.map((dept) => (
                     <MenuItem key={dept._id} value={dept._id}>
@@ -415,6 +496,7 @@ const AllEmployees = () => {
               sx={{ minWidth: 215 }}
               onChange={handleChange}
               name="role"
+              required
             >
               <MenuItem value="employee">Employee</MenuItem>
               <MenuItem value="teamlead">Team Lead</MenuItem>

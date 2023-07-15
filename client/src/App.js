@@ -28,6 +28,8 @@ import ResetPassword from './scenes/password/ResetPassword';
 import AddTask from './scenes/teamlead/project/AddTask';
 import UserProject from './scenes/employees/project/UserProject';
 import UserTask from './scenes/employees/project/UserTask';
+import OndutyList from './scenes/onduty/OndutyList';
+import OndutyApprove from './scenes/onduty/OndutyApprove';
 
 
 
@@ -63,6 +65,7 @@ function App() {
           <Route path='/profile' element={<ProfileSettings/>}/>
           <Route path='/view-project' element={<UserProject/>}/>
           <Route path='/view-task' element={<UserTask/>}/>
+          <Route path='/onduty' element={<OndutyList/>}/>
           </Route>
           </Route>
           {/* teamlead routes */}
@@ -72,6 +75,8 @@ function App() {
           <Route path='/teamlead/dashboard' element={<LeadDashboard/>}/>
           <Route path='/teamlead/view-project' element={<ViewProject/>}/>
           <Route path='/teamlead/view-task' element={<AddTask/>}/>
+          <Route path='/teamlead/onduty' element={<OndutyList/>}/>
+          <Route path='/teamlead/onduty-approval' element={<OndutyApprove/>}/>
           </Route>
           </Route>
         </Routes>

@@ -76,6 +76,20 @@ const addDepartment = async (req, res) => {
     res.status(500).json({ message: "Unable to add department" });
   }
 };
+const updateDepartment = async (req,res) =>{
+  try {
+   const id = req.query.id
+   const {department,designation} = req.body
+   const updatedData = await Department.findByIdAndUpdate({_id:id},{$set:{
+    department,
+    designation
+   }})
+   if(updatedData)
+   res.status(201).json({message:"Successfully added"})
+  } catch (error) {
+    res.status(500).json({message:error})
+  }
+}
 const employeeDetails = async (req, res) => {
   try {
     const { role } = req.query;
@@ -83,7 +97,7 @@ const employeeDetails = async (req, res) => {
     let aggregationPipeline = [
       {
         $lookup: {
-          from: "departments", // Name of the Department collection
+          from: "departments", 
           localField: "designation",
           foreignField: "_id",
           as: "department",
@@ -240,6 +254,7 @@ module.exports = {
   adminSignup,
   departmentDetails,
   addDepartment,
+  updateDepartment,
   employeeDetails,
   addEmployees,
   searchEmployee,

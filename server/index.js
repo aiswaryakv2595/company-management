@@ -57,23 +57,11 @@ mongoose
 const adminRouter = require('./routes/adminRoutes');
 const employeeRouter = require('./routes/employeeRoute');
 const teamleadRouter = require('./routes/teamleadRoutes');
-const { login, authUser, updateProfile, forgotPassword, resetPassword, verifyOtp } = require('./controller/globalController');
-const { jwtAuth } = require('./middleware/jwtAuth');
-const multer = require('./middleware/multer');
-const { updateStatus } = require('./controller/projectController');
+
+const commonRouter = require('./routes/commonRoutes');
 
 app.use('/api/admin', adminRouter);
 app.use('/api/employee', employeeRouter);
 app.use('/api/teamlead', teamleadRouter);
+app.use('/api',commonRouter)
 
-app.post('/api', login);
-app.get('/api/details', jwtAuth,multer.upload.single("profilePic"), authUser);
-app.patch("/api/update-profile",jwtAuth,multer.upload.single("profilePic"),updateProfile)
-
-app.post('/api/forgot-password',forgotPassword)
-
-
-app.post('/api/verify-otp',verifyOtp)
-app.post('/api/reset-password',resetPassword)
-
-app.post('/api/update-task-status',jwtAuth,updateStatus)

@@ -9,6 +9,7 @@ import axiosClient from "./axiosClient";
     getTeamlead:() => axiosClient.get('/admin/employees?role=teamlead'),
     getDepartment:() => axiosClient.get('/admin/department'),
     addDepartment:params => axiosClient.post('/admin/department',params),
+    updateDepartment:(id,inputs)=>axiosClient.patch(`/admin/department?id=${id}`,inputs)
 }
 export const projectApi = {
     getAllProject:() =>axiosClient.get('/admin/project'),
@@ -25,4 +26,9 @@ export const teamleadApi = {
     singleProjectLead: projectId => axiosClient.get(`/teamlead/view-task?id=${projectId}`),
     addTask:(inputs,projectId) => axiosClient.post('/teamlead/addtask', { ...inputs, project_id: projectId }),
     updateTask:params =>axiosClient.post('/update-task-status',params)
+}
+export const dutyApi = {
+    allDuty:() => axiosClient.get('/onduty-list'),
+    getDuty:() => axiosClient.get('/onduty'),
+    addDuty:params => axiosClient.post('/add-onduty',params)
 }
