@@ -48,6 +48,18 @@ export const navItems = [
     ],
   },
   {
+    text: "On Duty",
+    icon: null,
+    subItems: [
+      {
+        route: "admin/onduty-approval",
+        text: "Duty Approval",
+        icon: <Work />,
+      },
+      
+    ],
+  },
+  {
     text: "Projects",
     icon: null,
     subItems: [

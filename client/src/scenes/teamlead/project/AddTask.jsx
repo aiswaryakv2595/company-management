@@ -12,7 +12,10 @@ import {
   MenuItem,
   LinearProgress,
   Avatar,
+  IconButton,
+  Menu,
 } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -26,7 +29,17 @@ const AddTask = () => {
   const [tasks, setTasks] = useState([]);
   const [project, setProject] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [editedTask, setEditedTask] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const [inputs, setInputs] = useState({
     title: "",
     description: "",
@@ -52,15 +65,10 @@ const AddTask = () => {
     }
     const fetchEmployeeDetails = async () => {
       try {
-        // const response = await api.get("/admin/employees", {
-        //   headers: {
-        //     Authorization: `Bearer ${token}`,
-        //   },
-        // });
+     
 
         const response = await adminApi.allEmployees();
         const data = response.employees;
-  
 
         setEmployees(data);
       } catch (error) {
@@ -70,8 +78,7 @@ const AddTask = () => {
 
     const fetchProjectDetails = async () => {
       try {
-       
-        const response = await teamleadApi.getTeamleadProject()
+        const response = await teamleadApi.getTeamleadProject();
 
         const data = response.project;
         setProject(data);
@@ -119,7 +126,19 @@ const AddTask = () => {
       toast.error(err?.response?.data?.message || err.message);
     }
   };
-
+  const handleEdit = (task) => {
+    setEditedTask(task);
+    setInputs({
+      title: task.title,
+      description: task.description,
+      starting_date: task.starting_date,
+      due_date: task.due_date,
+      assigned_to: task.assigned_to,
+      priority: task.priority,
+    });
+    setIsEditMode(true);
+    setIsModalOpen(true);
+  };
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
     const { source, destination } = result;
@@ -143,7 +162,6 @@ const AddTask = () => {
       });
 
       toast.success(`Moved to ${movedTask.status}`);
-      
     } catch (error) {
       console.log("Error updating task status:", error);
     }
@@ -182,9 +200,49 @@ const AddTask = () => {
                               >
                                 <Card sx={{ mb: 2 }}>
                                   <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                      Title: {task.title}
-                                    </Typography>
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                      }}
+                                    >
+                                      <Typography variant="h6" gutterBottom>
+                                        Title: {task.title}
+                                      </Typography>
+                                      <IconButton
+                                      onClick={handleClick}
+                                        size="small"
+                                        sx={{ ml: 2 }}
+                                        aria-controls={
+                                          open ? "account-menu" : undefined
+                                        }
+                                        aria-haspopup="true"
+                                        aria-expanded={
+                                          open ? "true" : undefined
+                                        }
+                                      >
+                                        <MoreVertIcon />
+                                      </IconButton>
+                                      <Menu
+        id="lock-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          'aria-labelledby': 'lock-button',
+          role: 'listbox',
+        }}
+      >
+        <MenuItem onClick={handleEdit.bind(null, task)}>
+          Edit
+        </MenuItem>
+        
+       
+        
+       
+      </Menu>
+                                    </Box>
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"

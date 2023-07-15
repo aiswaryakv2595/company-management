@@ -100,13 +100,20 @@ const OndutyList = () => {
         headerName: "Status",
         width: 130,
         renderCell: (params) => (
-            <Grid container spacing={1} alignItems="center">
-              <Grid item>
-                 <PersonOutlineOutlined/>
-              </Grid>
-              <Grid item>{params.value}</Grid>
+          <Grid container spacing={1} alignItems="center">
+            <Grid item>
+              {params.value === "Absent" ? (
+                <PersonOutlineOutlined fontSize="large" sx={{ color: "#EF6262" }} />
+              ) : params.value === "Present" ? (
+                <PersonOutlineOutlined fontSize="large" sx={{ color: "#468B97" }} />
+              )  : (
+                <PersonOutlineOutlined fontSize="large" sx={{ color: "#F3AA60" }} />
+              )}
             </Grid>
-          ),
+            <Grid item>{params.value}</Grid>
+          </Grid>
+        ),
+        
       },
     {
       field: "working",

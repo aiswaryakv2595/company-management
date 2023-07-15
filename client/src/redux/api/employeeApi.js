@@ -28,7 +28,8 @@ export const teamleadApi = {
     updateTask:params =>axiosClient.post('/update-task-status',params)
 }
 export const dutyApi = {
-    allDuty:() => axiosClient.get('/onduty-list'),
+    allDuty:(from,to) => axiosClient.get(`/onduty-list?from=${from}&to=${to}`),
     getDuty:() => axiosClient.get('/onduty'),
-    addDuty:params => axiosClient.post('/add-onduty',params)
+    addDuty:params => axiosClient.post('/add-onduty',params),
+    approveDuty:params => axiosClient.patch('/onduty-approve',params)
 }

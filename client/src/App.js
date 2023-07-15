@@ -50,6 +50,7 @@ function App() {
             <Route path='/admin/employees' element={<AllEmployees/>}/>
             <Route path='/admin/projects' element={<AllProjects/>}/>
             <Route path="/admin/edit-project/:projectId" element={<EditProject/>} />
+            <Route path='/admin/onduty-approval' element={<OndutyApprove/>}/>
             
           </Route>
           </Route>

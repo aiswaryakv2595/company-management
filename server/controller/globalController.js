@@ -151,55 +151,90 @@ const resetPassword = async (req, res) => {
 // on duty
 const addOnduty = async (req, res) => {
   try {
-    const {onduty_date, requested_date, working, reason } =
-      req.body;
-      const employeeID = req.employee._id
-      const existingDuty = await Onduty.findOne({employeeID:employeeID,onduty_date:onduty_date})
-      if(existingDuty){
-        res.status(403).json({message:"alredy added"})
-      }
-      else{
-    const onduty = new Onduty({
-      employeeID,
-      onduty_date,
-      requested_date,
-      working,
-      reason,
+    const { onduty_date, requested_date, working, reason } = req.body;
+    const employeeID = req.employee._id;
+    const existingDuty = await Onduty.findOne({
+      employeeID: employeeID,
+      onduty_date: onduty_date,
     });
-    console.log(employeeID)
-    await onduty.save()
-  
-  
-    res.status(201).json({onduty})
-  }
+    if (existingDuty) {
+      res.status(403).json({ message: "alredy added" });
+    } else {
+      const onduty = new Onduty({
+        employeeID,
+        onduty_date,
+        requested_date,
+        working,
+        reason,
+      });
+      console.log(employeeID);
+      await onduty.save();
+
+      res.status(201).json({ onduty });
+    }
   } catch (error) {
-    res.status(500).json({message:"something went wrong"})
+    res.status(500).json({ message: "something went wrong" });
   }
 };
-const ondutyListing = async (req,res) => {
+const ondutyListing = async (req, res) => {
   try {
-    const employee_id = req.employee._id
-    const onduty = await Onduty.find({employeeID:employee_id})
-    if(onduty)
-    res.status(200).json({onduty})
-    else
-    res.status(404).json({message:"NO Duties found"})
+    const employee_id = req.employee._id;
+    const onduty = await Onduty.find({ employeeID: employee_id });
+    if (onduty) res.status(200).json({ onduty });
+    else res.status(404).json({ message: "NO Duties found" });
   } catch (error) {
-    res.status(500).json({message:error})
+    res.status(500).json({ message: error });
   }
-}
-const ondutyListingAll = async (req,res) => {
+};
+const ondutyListingAll = async (req, res) => {
   try {
-    const employee_id = req.employee._id
-    const onduty = await Onduty.find({ employeeID: { $ne: employee_id } });
-    if(onduty.length >0)
-    res.status(200).json({onduty})
-    else
-    res.status(404).json({message:"NO Duties found"})
+    const employee_id = req.employee._id;
+    const { from, to } = req.query;
+
+    const onduty = await Onduty.find({
+      employeeID: { $ne: employee_id },
+      onduty_date: {
+        $gte: from,
+        $lte: to,
+      },
+    }).populate("employeeID");
+
+    if (onduty.length > 0) {
+      res.status(200).json({ onduty });
+    } else {
+      res.status(404).json({ message: "No duties found" });
+    }
   } catch (error) {
-    res.status(500).json({message:error})
+    res.status(500).json({ message: error.message });
   }
-}
+};
+
+
+const ondutyApprove = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let dutyStatus;
+    const existingDuty = await Onduty.findById(id);
+    console.log("existing", existingDuty);
+    if (existingDuty.status == "Absent") {
+      dutyStatus = "Present";
+    } else dutyStatus = "Absent";
+    console.log(dutyStatus);
+    const onduty = await Onduty.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          status: dutyStatus,
+        },
+      },
+      { new: true }
+    );
+    console.log(onduty);
+    res.status(200).json({ onduty });
+  } catch (error) {
+    res.status(500).json({ message: "something went wrong" });
+  }
+};
 module.exports = {
   login,
   authUser,
@@ -210,4 +245,5 @@ module.exports = {
   ondutyListing,
   ondutyListingAll,
   addOnduty,
+  ondutyApprove,
 };

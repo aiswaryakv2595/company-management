@@ -13,7 +13,7 @@ const ondutySchema = new mongoose.Schema({
     requested_date:String,
     status:{
         type:String,
-        default:'pending'
+        default:'Absent'
     },
     working:String,
     reason:String
