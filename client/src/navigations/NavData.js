@@ -11,6 +11,7 @@ import {
   VideoCall,
   Work,
   WorkHistory,
+  WorkOff,
   WorkspacePremium,
 } from "@mui/icons-material";
 
@@ -44,6 +45,23 @@ export const navItems = [
         route: "admin/attendance",
         text: "Attendance",
         icon: <CoPresentOutlined />,
+      },
+    ],
+  },
+  {
+    text: "Leaves",
+    icon: null,
+    subItems: [
+      
+      {
+        route: "admin/leave-approval",
+        text: "Leave Approval",
+        icon: <WorkOff />,
+      },
+      {
+        route: "admin/holiday",
+        text: "My Holiday",
+        icon: <FactCheckOutlined />,
       },
     ],
   },
@@ -194,6 +212,11 @@ export const navItemsteamlead = [
         route: "teamlead/leaves",
         text: "My Leaves",
         icon: <GroupsOutlined />,
+      },
+      {
+        route: "teamlead/leave-approval",
+        text: "Leave Approval",
+        icon: <WorkOff />,
       },
       {
         route: "teamlead/holiday",

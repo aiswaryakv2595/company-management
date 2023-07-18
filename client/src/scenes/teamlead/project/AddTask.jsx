@@ -65,8 +65,6 @@ const AddTask = () => {
     }
     const fetchEmployeeDetails = async () => {
       try {
-     
-
         const response = await adminApi.allEmployees();
         const data = response.employees;
 
@@ -141,6 +139,7 @@ const AddTask = () => {
   };
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
+
     const { source, destination } = result;
     if (
       source.droppableId === destination.droppableId &&
@@ -148,15 +147,20 @@ const AddTask = () => {
     )
       return;
 
-    const updatedTasks = Array.from(tasks);
-    const [movedTask] = updatedTasks.splice(source.index, 1);
+    const updatedTasks = [...tasks];
+    const movedTask = updatedTasks.find(
+      (task) => task._id === result.draggableId
+    );
+    if (!movedTask) return;
+
     movedTask.status = destination.droppableId.split("-")[1];
+    updatedTasks.splice(source.index, 1);
     updatedTasks.splice(destination.index, 0, movedTask);
 
     setTasks(updatedTasks);
-    console.log("movedTask", movedTask.status);
+
     try {
-      const response = await teamleadApi.updateTask({
+      await teamleadApi.updateTask({
         task_id: movedTask._id,
         status: movedTask.status,
       });
@@ -211,7 +215,7 @@ const AddTask = () => {
                                         Title: {task.title}
                                       </Typography>
                                       <IconButton
-                                      onClick={handleClick}
+                                        onClick={handleClick}
                                         size="small"
                                         sx={{ ml: 2 }}
                                         aria-controls={
@@ -225,23 +229,21 @@ const AddTask = () => {
                                         <MoreVertIcon />
                                       </IconButton>
                                       <Menu
-        id="lock-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          'aria-labelledby': 'lock-button',
-          role: 'listbox',
-        }}
-      >
-        <MenuItem onClick={handleEdit.bind(null, task)}>
-          Edit
-        </MenuItem>
-        
-       
-        
-       
-      </Menu>
+                                        id="lock-menu"
+                                        anchorEl={anchorEl}
+                                        open={open}
+                                        onClose={handleClose}
+                                        MenuListProps={{
+                                          "aria-labelledby": "lock-button",
+                                          role: "listbox",
+                                        }}
+                                      >
+                                        <MenuItem
+                                          onClick={handleEdit.bind(null, task)}
+                                        >
+                                          Edit
+                                        </MenuItem>
+                                      </Menu>
                                     </Box>
                                     <Typography
                                       variant="body2"

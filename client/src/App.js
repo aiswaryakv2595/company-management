@@ -30,6 +30,12 @@ import UserProject from './scenes/employees/project/UserProject';
 import UserTask from './scenes/employees/project/UserTask';
 import OndutyList from './scenes/onduty/OndutyList';
 import OndutyApprove from './scenes/onduty/OndutyApprove';
+import LeaveList from './scenes/leave/LeaveList';
+import LeaveApproval from './scenes/leave/LeaveApproval';
+import Holiday from './scenes/admin/holiday/Holiday';
+
+import TeamleadTimesheet from './scenes/teamlead/timesheet/TeamleadTimesheet';
+import EmployeeTimesheet from './scenes/employees/timesheet/EmployeeTimesheet';
 
 
 
@@ -51,6 +57,8 @@ function App() {
             <Route path='/admin/projects' element={<AllProjects/>}/>
             <Route path="/admin/edit-project/:projectId" element={<EditProject/>} />
             <Route path='/admin/onduty-approval' element={<OndutyApprove/>}/>
+            <Route path='/admin/leave-approval' element={<LeaveApproval/>}/>
+            <Route path='/admin/holiday' element={<Holiday/>}/>
             
           </Route>
           </Route>
@@ -67,6 +75,9 @@ function App() {
           <Route path='/view-project' element={<UserProject/>}/>
           <Route path='/view-task' element={<UserTask/>}/>
           <Route path='/onduty' element={<OndutyList/>}/>
+          <Route path='/leaves' element={<LeaveList/>}/>
+          <Route path='/timesheet' element={<EmployeeTimesheet/>}/>
+          
           </Route>
           </Route>
           {/* teamlead routes */}
@@ -78,6 +89,9 @@ function App() {
           <Route path='/teamlead/view-task' element={<AddTask/>}/>
           <Route path='/teamlead/onduty' element={<OndutyList/>}/>
           <Route path='/teamlead/onduty-approval' element={<OndutyApprove/>}/>
+          <Route path='/teamlead/leaves' element={<LeaveList/>}/>
+          <Route path='/teamlead/leave-approval' element={<LeaveApproval/>}/>
+          <Route path='/teamlead/timesheet' element={<TeamleadTimesheet/>}/>
           </Route>
           </Route>
         </Routes>

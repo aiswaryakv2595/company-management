@@ -19,7 +19,7 @@ dotenv.config();
 mongoose
   .connect('mongodb://127.0.0.1:27017/CMS')
   .then(() => {
-    // Initialize the "Admin" department and "HR" designation
+  
     const Department = require('./model/Department');
     const initDepartment = async () => {
       try {

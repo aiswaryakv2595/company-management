@@ -9,6 +9,8 @@ const {
   searchEmployee,
   employeeStatus,
   updateDepartment,
+  addHoliday,
+  allHoliday,
 } = require("../controller/adminController");
 const { jwtAuth } = require("../middleware/jwtAuth");
 const {
@@ -48,5 +50,6 @@ adminRouter.patch(
   multer.upload.single("attachment"),
   updateProject
 );
-
+adminRouter.post('/add-holiday',jwtAuth,addHoliday)
+adminRouter.get('/holiday',jwtAuth,allHoliday)
 module.exports = adminRouter;

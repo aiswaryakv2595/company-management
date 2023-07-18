@@ -1,63 +1,32 @@
-import {
-  Box,
-  useTheme,
-  Button,
-  useMediaQuery,
-  DialogActions,
-  DialogContentText,
-  DialogContent,
-  DialogTitle,
-  Dialog,
-  TextField,
-  Typography,
-  MenuItem,
-} from "@mui/material";
-import { PersonOutlineOutlined } from "@mui/icons-material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, MenuItem, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import Header from '../../components/Header'
+import { adminApi, leaveApi } from '../../redux/api/employeeApi'
+import { useSelector } from 'react-redux'
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import React, { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import { DataGrid } from "@mui/x-data-grid";
-import Grid from "@mui/material/Unstable_Grid2";
-import { useSelector } from "react-redux";
-import { adminApi, dutyApi } from "../../redux/api/employeeApi";
+import { DataGrid } from '@mui/x-data-grid'
 
-const OndutyList = () => {
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+const LeaveList = () => {
+  const theme = useTheme()
   const [open, setOpen] = useState(false);
+  const [leave, setLeave] = useState([])
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [employee, setEmployee] = useState([]);
-  const [onduty, setOnduty] = useState([])
   const [inputs, setInputs] = useState({
     employeeID: "",
     from: "",
     to: "",
-    working: "",
+    onduty_type:"",
+    leave_duration: "",
     reason: "",
   });
   const handleChange = (e) => {
-    const { name, value } = e.target;
-  
-    if (name === "from") {
-      const currentDate = new Date().toISOString().split("T")[0];
-  
-      if (value !== currentDate) {
-        return; 
-      }
-  
-      setInputs((prev) => ({
-        ...prev,
-        from: value,
-        to: value,
-      }));
-    } else {
-      setInputs((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setInputs((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
-  
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -71,22 +40,22 @@ const OndutyList = () => {
       }
     };
     const fetchDutyDetails = async () => {
-        try {
-          const response = await dutyApi.getDuty();
-          const data = response.onduty;
-         console.log('duty=',data)
-          setOnduty(data);
-        } catch (error) {
-          console.log("Error fetching  details:", error);
-        }
-      };
-    
-    if (isLoggedIn) {
-      fetchUserDetails();
+      try {
+        const response = await leaveApi.getLeave();
+        const data = response.leave;
+       console.log('leave=',data)
+        setLeave(data);
+      } catch (error) {
+        console.log("Error fetching  details:", error);
+      }
+    };
+    if(isLoggedIn){
+      fetchUserDetails()
       fetchDutyDetails()
     }
-  }, [isLoggedIn]);
-  const dutyWithIndex = onduty.map((row, index) => ({
+  }, [isLoggedIn])
+  
+  const leaveIndex = leave.map((row, index) => ({
     ...row,
     slNo: index + 1,
   }));
@@ -95,64 +64,49 @@ const OndutyList = () => {
     { field: "from", headerName: "From", width: 130 },
     { field: "to", headerName: "To", width: 130 },
     {
-        field: "status",
+        field: "leave_status",
         headerName: "Status",
-        width: 130,
-        renderCell: (params) => (
-          <Grid container spacing={1} alignItems="center">
-            <Grid item>
-              {params.value === "Absent" ? (
-                <PersonOutlineOutlined fontSize="large" sx={{ color: "#EF6262" }} />
-              ) : params.value === "Present" ? (
-                <PersonOutlineOutlined fontSize="large" sx={{ color: "#468B97" }} />
-              )  : (
-                <PersonOutlineOutlined fontSize="large" sx={{ color: "#F3AA60" }} />
-              )}
-            </Grid>
-            <Grid item>{params.value}</Grid>
-          </Grid>
-        ),
-        
+        width: 130, 
       },
     {
-      field: "working",
-      headerName: "Working",
+      field: "leave_duration",
+      headerName: "Duration",
       width: 90,
     },
     { field: "reason", headerName: "Reason", width: 130 },
   ];
-  
+
   const handleSubmit = async () => {
     try {
-      const updatedResponse = await dutyApi.addDuty(inputs);
-      const newDuty = updatedResponse.onduty;
-      toast.success("Duty added");
-      setOnduty((prevDuty) => [...prevDuty, newDuty]);
+      const updatedResponse = await leaveApi.addLeave(inputs);
+      const newLeave = updatedResponse.leave;
+      toast.success("leave added");
+      console.log('leave-----',newLeave)
+      setLeave((prev) => [...prev, newLeave]);
       setOpen(false);
     } catch (error) {
       toast.error("Duty already exists");
     }
   };
-  
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="On-Duty" subtitle="On duty listing" />
-      <Box display="flex" justifyContent="flex-end" mb="20px">
+        <Header title="Leave" subtitle="All leaves" />
+        <Box display="flex" justifyContent="flex-end" mb="20px">
         <Button
           variant="contained"
           sx={{
             bgcolor: theme.palette.primary[50],
             color: theme.palette.secondary[1000],
           }}
-          onClick={() => setOpen(true)}
+          onClick={()=>setOpen(true)}
         >
           + ADD
         </Button>
       </Box>
-      {onduty.length > 0 ? (
+      {leave.length > 0 ? (
       <Box mt="20px">
         <DataGrid
-          rows={dutyWithIndex}
+          rows={leaveIndex}
           getRowId={(row) => row._id}
           columns={columns}
           initialState={{
@@ -189,12 +143,28 @@ const OndutyList = () => {
               <Grid xs={6} md={6}>
                 <Typography>Type</Typography>
                 <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  value="On duty"
-                  fullWidth
-                  onChange={handleChange}
-                />
+  id="outlined-basic"
+  variant="outlined"
+  value={inputs.onduty_type}
+  name="onduty_type"
+  fullWidth
+  select
+  onChange={handleChange}
+>
+  {leave.length === 0 ? (
+    <MenuItem value="Earned Leave">Earned Leave</MenuItem>
+  ) : (
+    leave.map((item) => (
+      <MenuItem
+        key={item._id}
+        value={item.earnedLeave > 0 ? "Earned Leave" : "Loss Of Pay"}
+      >
+        {item.earnedLeave > 0 ? "Earned Leave" : "Loss Of Pay"}
+      </MenuItem>
+    ))
+  )}
+</TextField>
+
               </Grid>
               <Grid xs={4} md={4}>
                 <Typography>Date</Typography>
@@ -225,12 +195,12 @@ const OndutyList = () => {
   />
               </Grid>
               <Grid xs={4} md={4}>
-                <Typography>Working</Typography>
+                <Typography>Duration</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
-                  name="working"
-                  value={inputs.working}
+                  name="leave_duration"
+                  value={inputs.leave_duration}
                   fullWidth
                   select
                   onChange={handleChange}
@@ -268,7 +238,7 @@ const OndutyList = () => {
         </DialogActions>
       </Dialog>
     </Box>
-  );
-};
+  )
+}
 
-export default OndutyList;
+export default LeaveList

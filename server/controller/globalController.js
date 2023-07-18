@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Onduty = require("../model/Onduty");
+const Holiday = require("../model/Holiday");
+const Timesheet = require("../model/Timesheet");
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -151,19 +153,21 @@ const resetPassword = async (req, res) => {
 // on duty
 const addOnduty = async (req, res) => {
   try {
-    const { onduty_date, requested_date, working, reason } = req.body;
+    const { from, to, working, reason } = req.body;
     const employeeID = req.employee._id;
+
     const existingDuty = await Onduty.findOne({
       employeeID: employeeID,
-      onduty_date: onduty_date,
+      from: from,
     });
     if (existingDuty) {
       res.status(403).json({ message: "alredy added" });
     } else {
       const onduty = new Onduty({
         employeeID,
-        onduty_date,
-        requested_date,
+        tl_id: req.employee.tl_id,
+        from,
+        to,
         working,
         reason,
       });
@@ -192,8 +196,8 @@ const ondutyListingAll = async (req, res) => {
     const { from, to } = req.query;
 
     const onduty = await Onduty.find({
-      employeeID: { $ne: employee_id },
-      onduty_date: {
+      tl_id: employee_id,
+      from: {
         $gte: from,
         $lte: to,
       },
@@ -208,7 +212,6 @@ const ondutyListingAll = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 const ondutyApprove = async (req, res) => {
   try {
@@ -228,13 +231,196 @@ const ondutyApprove = async (req, res) => {
         },
       },
       { new: true }
-    );
+    ).populate("employeeID");
     console.log(onduty);
     res.status(200).json({ onduty });
   } catch (error) {
     res.status(500).json({ message: "something went wrong" });
   }
 };
+const addLeave = async (req, res) => {
+  const currentDate = new Date().toISOString().split("T")[0];
+  try {
+    const { from, to, leave_duration, onduty_type, reason } = req.body;
+    const employeeID = req.employee._id;
+    const existingLeave = await Onduty.findOne({
+      employeeID: employeeID,
+      from: from,
+      status: "Leave",
+    });
+    if (existingLeave) {
+      res.status(403).json({ message: "alredy added" });
+    } else {
+      const leave = new Onduty({
+        employeeID,
+        tl_id: req.employee.tl_id,
+        leave_requested: currentDate,
+        from,
+        to,
+        onduty_type,
+        status: "Leave",
+        leave_duration,
+        reason,
+      });
+      await leave.save();
+      res.status(200).json({ leave });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "something went wrong" });
+  }
+};
+const leaveListing = async (req, res) => {
+  try {
+    const employee_id = req.employee._id;
+    const leave = await Onduty.find({
+      employeeID: employee_id,
+      status: "Leave",
+    });
+    if (leave) res.status(200).json({ leave });
+    else res.status(404).json({ message: "NO Leave found" });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+const leaveListingAll = async (req, res) => {
+  try {
+    const employee_id = req.employee._id;
+    const { from, to } = req.query;
+    const currentDate = new Date().toISOString().split("T")[0];
+    let leave;
+    if (from != "") {
+      leave = await Onduty.find({
+        tl_id: employee_id,
+        from: {
+          $gte: from,
+          $lte: to,
+        },
+        status: "Leave",
+      }).populate("employeeID");
+    } else {
+      leave = await Onduty.find({
+        tl_id: employee_id,
+        leave_requested: currentDate,
+        status: "Leave",
+      }).populate("employeeID");
+    }
+
+    if (leave.length > 0) {
+      res.status(200).json({ leave });
+    } else {
+      res.status(404).json({ message: "No duties found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const leaveApprove = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const existingLeave = await Onduty.findById({ _id: id, status: "Leave" });
+    const leaveDuration = Math.ceil(
+      (new Date(existingLeave.to) - new Date(existingLeave.from)) / (1000 * 60 * 60 * 24)
+    );
+
+    let leaveStatus;
+    if (existingLeave.leave_status === "Pending" || existingLeave.leave_status === "Rejected") {
+      leaveStatus = "Accepted";
+      const leaveDates = getDatesArray(new Date(existingLeave.from), new Date(existingLeave.to));
+      const holidays = await Holiday.find({ date: { $in: leaveDates } });
+      const holidayDates = holidays.map(holiday => holiday.date);
+
+      const validLeaveDates = leaveDates.filter(date => !holidayDates.includes(date));
+
+      if (leaveDuration > existingLeave.earnedLeave) {
+        existingLeave.lop = leaveDuration - existingLeave.earnedLeave;
+        existingLeave.earnedLeave = 0;
+      } else {
+        existingLeave.earnedLeave -= leaveDuration;
+      }
+
+      existingLeave.from = validLeaveDates[0];
+      existingLeave.to = validLeaveDates[validLeaveDates.length - 1];
+    } else if (existingLeave.leave_status === "Accepted") {
+      leaveStatus = "Rejected";
+      existingLeave.earnedLeave += leaveDuration;
+      existingLeave.lop = 0;
+    } else {
+      leaveStatus = existingLeave.leave_status; // Leave status remains unchanged
+    }
+
+    await existingLeave.save();
+
+    const leave = await Onduty.findByIdAndUpdate(
+      { _id: id, status: "Leave" },
+      {
+        $set: {
+          leave_status: leaveStatus,
+        },
+      },
+      { new: true }
+    ).populate("employeeID");
+
+    res.status(200).json({ leave });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong", error: error.message });
+  }
+};
+
+
+
+// Helper function to get an array of dates between two dates
+function getDatesArray(startDate, endDate) {
+  const datesArray = [];
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    datesArray.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return datesArray;
+}
+
+const getTimesheet = async (req, res) => {
+  try {
+    const timesheet = await Timesheet.find({ employeeID: req.employee._id }).populate('project_id');
+
+    console.log('timesheets', timesheet);
+
+    if (timesheet.length > 0) {
+      res.status(200).json({ timesheet });
+    } else {
+      res.status(404).json({ message: "No timesheets found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
+ const addTimesheet = async (req,res) => {
+ try {
+  const {date,project_id,task,time} = req.body
+  const employeeID = req.employee._id
+  const existingTimesheet = await Timesheet.findOne({date:date,employeeID:employeeID})
+  if(existingTimesheet)
+  res.status(409).json({message:"timesheet exist"})
+  else{
+    const timesheet = new Timesheet({
+      employeeID:employeeID,
+      date:date,
+      project_id:project_id,
+      task:task,
+      time:time
+    })
+
+    await timesheet.save()
+    res.status(201).json({timesheet})
+  }
+ } catch (error) {
+  res.status(500).json({message:error})
+ }
+ }
+
 module.exports = {
   login,
   authUser,
@@ -246,4 +432,10 @@ module.exports = {
   ondutyListingAll,
   addOnduty,
   ondutyApprove,
+  addLeave,
+  leaveListing,
+  leaveListingAll,
+  leaveApprove,
+  getTimesheet,
+  addTimesheet
 };

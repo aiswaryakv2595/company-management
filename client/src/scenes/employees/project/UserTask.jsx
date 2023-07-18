@@ -85,7 +85,7 @@ const UserTask = () => {
         task_id: movedTask._id,
         status: movedTask.status,
       });
-
+      if(response)
       toast.success(`Moved to ${movedTask.status}`);
     } catch (error) {
       console.log("Error updating task status:", error);

@@ -183,10 +183,11 @@ const viewTask = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { task_id, status } = req.body;
-    
-    const updatedTask = await Project.updateOne(
+    console.log(req.body)
+    const updatedTask = await Project.findOneAndUpdate(
       { "task._id": task_id },
-      { $set: { "task.$.status": status } }
+      { $set: { "task.$.status": status } },
+      { new: true }
     );
     
     res.status(200).json({ task: updatedTask });

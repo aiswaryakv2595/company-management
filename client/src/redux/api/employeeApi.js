@@ -9,7 +9,9 @@ import axiosClient from "./axiosClient";
     getTeamlead:() => axiosClient.get('/admin/employees?role=teamlead'),
     getDepartment:() => axiosClient.get('/admin/department'),
     addDepartment:params => axiosClient.post('/admin/department',params),
-    updateDepartment:(id,inputs)=>axiosClient.patch(`/admin/department?id=${id}`,inputs)
+    updateDepartment:(id,inputs)=>axiosClient.patch(`/admin/department?id=${id}`,inputs),
+    addHoliday:params => axiosClient.post('/admin/add-holiday',params),
+    allHoliday:() => axiosClient.get('/admin/holiday')
 }
 export const projectApi = {
     getAllProject:() =>axiosClient.get('/admin/project'),
@@ -25,11 +27,21 @@ export const teamleadApi = {
     getTeamleadProject:() =>axiosClient.get('/teamlead/view-project'),
     singleProjectLead: projectId => axiosClient.get(`/teamlead/view-task?id=${projectId}`),
     addTask:(inputs,projectId) => axiosClient.post('/teamlead/addtask', { ...inputs, project_id: projectId }),
-    updateTask:params =>axiosClient.post('/update-task-status',params)
+    updateTask:params =>axiosClient.patch('/update-task-status',params)
 }
 export const dutyApi = {
     allDuty:(from,to) => axiosClient.get(`/onduty-list?from=${from}&to=${to}`),
     getDuty:() => axiosClient.get('/onduty'),
     addDuty:params => axiosClient.post('/add-onduty',params),
-    approveDuty:params => axiosClient.patch('/onduty-approve',params)
+    approveDuty:params => axiosClient.patch('/onduty-approve',params),
+    addTimesheet:params=>axiosClient.post('/timesheet',params),
+    getTimesheet:() => axiosClient.get('/timesheet')
+
+}
+
+export const leaveApi = {
+    getLeave:() => axiosClient.get('/leave'),
+    addLeave:params => axiosClient.post('/leave',params),
+    employeeLeaveList:(from,to) => axiosClient.get(`/leave-list?from=${from}&to=${to}`),
+    approveLeave:params => axiosClient.patch('/leave-approve',params)
 }

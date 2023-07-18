@@ -1,42 +1,63 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { dutyApi } from "../../redux/api/employeeApi";
-import { Box, Button, Grid, TextField, useTheme } from "@mui/material";
-import { PersonOutlineOutlined } from "@mui/icons-material";
-import Header from "../../components/Header";
-import { DataGrid } from "@mui/x-data-grid";
+import { Box, Button, Grid, TextField, useTheme } from '@mui/material'
+import React, { useCallback, useEffect, useState } from 'react'
+import Header from '../../components/Header'
+import { useSelector } from 'react-redux';
+import { leaveApi } from '../../redux/api/employeeApi';
+import { PersonOutlineOutlined } from '@mui/icons-material';
+import { DataGrid } from '@mui/x-data-grid';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const OndutyApprove = () => {
-  const [onduty, setOnduty] = useState([]);
+
+const LeaveApproval = () => {
+   const [leave, setLeave] = useState([]) 
   const theme = useTheme();
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
-  const currentDate = new Date().toISOString().split("T")[0]; 
-  const [fromdate, setFromdate] = useState(currentDate)
-  const [todate, setTodate] = useState(currentDate)
-  const fetchDutyDetails = useCallback(async () => {
+   
+    const [fromdate, setFromdate] = useState("")
+  const [todate, setTodate] = useState("")
+
+  const fetchLeaveDetails = useCallback(async () => {
     try {
-      const response = await dutyApi.allDuty(fromdate, todate);
-      const data = response.onduty;
+      const response = await leaveApi.employeeLeaveList(fromdate, todate);
+      const data = response.leave;
       console.log(data);
-      setOnduty(data);
+      setLeave(data);
     } catch (error) {
       console.log("Error fetching details:", error);
     }
   }, [fromdate, todate]);
   useEffect(() => {
     if (isLoggedIn) {
-      fetchDutyDetails();
+      fetchLeaveDetails();
     }
-  }, [isLoggedIn, fetchDutyDetails]);
-
-
-  const dutyWithIndex = onduty.map((row, index) => ({
+  }, [isLoggedIn, fetchLeaveDetails]);
+  const leaveWithIndex = leave.map((row, index) => ({
     ...row,
     slNo: index + 1,
   }));
-
+  const handleApprove = async (leaveId) => {
+    try {
+      const response = await leaveApi.approveLeave({ id: leaveId });
+      const updatedResponse = response.leave;
+      if (updatedResponse.leave_status === "Accepted") {
+        toast.success("Successfully updated");
+      } else {
+        toast.success("Rejected");
+      }
+      setLeave((prev) => {
+        const updatedLeave = prev.map((leave) => {
+          if (leave._id === updatedResponse._id) {
+            return updatedResponse;
+          }
+          return leave;
+        });
+        return updatedLeave;
+      });
+    } catch (error) {
+      console.log("Error updating employee status:", error);
+    }
+  };
   const columns = [
     { field: "slNo", headerName: "Sl no", width: 70 },
     {
@@ -48,7 +69,7 @@ const OndutyApprove = () => {
     { field: "from", headerName: "From", width: 130 },
     { field: "to", headerName: "To", width: 130 },
     {
-      field: "status",
+      field: "leave_status",
       headerName: "Status",
       width: 130,
       renderCell: (params) => (
@@ -60,7 +81,7 @@ const OndutyApprove = () => {
         </Grid>
       ),
     },
-    { field: "working", headerName: "Working", width: 90 },
+    { field: "leave_duration", headerName: "Leave Duration", width: 90 },
     { field: "reason", headerName: "Reason", width: 130 },
     {
       field: "actions",
@@ -68,7 +89,7 @@ const OndutyApprove = () => {
       width: 130,
       renderCell: (params) => (
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          {params.row.status === "Absent" ? (
+          {params.row.leave_status === "Pending" || params.row.leave_status === "Rejected" ? (
             <Button
               variant="contained"
               sx={{
@@ -79,7 +100,7 @@ const OndutyApprove = () => {
             >
               Approve
             </Button>
-          ) : params.row.status === "Present" ? (
+          ) : 
             <Button
               variant="contained"
               sx={{
@@ -90,43 +111,17 @@ const OndutyApprove = () => {
             >
               Reject
             </Button>
-          ) : null}
+          }
         </Box>
       ),
       
       
     },
   ];
-
-  const handleApprove = async (dutyId) => {
-    try {
-      const response = await dutyApi.approveDuty({ id: dutyId });
-      const updatedResponse = response.onduty;
-      if (updatedResponse.status === "Present") {
-        toast.success("Successfully updated");
-      } else {
-        toast.success("Rejected");
-      }
-      setOnduty((prev) => {
-        const updatedOnduty = prev.map((duty) => {
-          if (duty._id === updatedResponse._id) {
-            return updatedResponse;
-          }
-          return duty;
-        });
-        return updatedOnduty;
-      });
-    } catch (error) {
-      console.log("Error updating employee status:", error);
-    }
-  };
-
   return (
     <Box m="1.5rem 2.5rem">
-   
-      <Header title="On-Duty Approval" />
-    
-      <Grid container spacing={2} sx={{ mt: 2 }}>
+        <Header title="Leave Approval" />
+        <Grid container spacing={2} sx={{ mt: 2 }}>
   <Grid item xs={12} sm={6} md={4}>
     <TextField
       id="outlined-basic"
@@ -167,18 +162,16 @@ const OndutyApprove = () => {
         backgroundColor: "#f27457",
       }}
       fullWidth
-      onClick={fetchDutyDetails}
+    //   onClick={fetchDutyDetails}
     >
       Search
     </Button>
   </Grid>
 </Grid>
-
-      
-      {onduty.length > 0 ? (
+{leave.length > 0 ? (
         <Box mt="20px">
           <DataGrid
-            rows={dutyWithIndex}
+            rows={leaveWithIndex}
             getRowId={(row) => row._id}
             columns={columns}
             initialState={{
@@ -191,7 +184,7 @@ const OndutyApprove = () => {
         </Box>
       ) : null}
     </Box>
-  );
-};
+  )
+}
 
-export default OndutyApprove;
+export default LeaveApproval

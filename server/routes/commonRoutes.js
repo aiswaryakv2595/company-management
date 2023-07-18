@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("../middleware/multer");
 const commonRouter = express.Router();
 
-const { login, authUser, updateProfile, forgotPassword, resetPassword, verifyOtp, addOnduty, ondutyListing, ondutyListingAll, ondutyApprove } = require('../controller/globalController');
+const { login, authUser, updateProfile, forgotPassword, resetPassword, verifyOtp, addOnduty, ondutyListing, ondutyListingAll, ondutyApprove, addLeave, leaveListing, leaveListingAll, leaveApprove, getTimesheet, addTimesheet } = require('../controller/globalController');
 const { jwtAuth } = require('../middleware/jwtAuth');
 const { updateStatus } = require('../controller/projectController');
 
@@ -16,11 +16,19 @@ commonRouter.post('/forgot-password',forgotPassword)
 commonRouter.post('/verify-otp',verifyOtp)
 commonRouter.post('/reset-password',resetPassword)
 
-commonRouter.post('/update-task-status',jwtAuth,updateStatus)
+commonRouter.patch('/update-task-status',jwtAuth,updateStatus)
 
 commonRouter.get('/onduty',jwtAuth,ondutyListing)
 commonRouter.get('/onduty-list',jwtAuth,ondutyListingAll)
 commonRouter.post('/add-onduty',jwtAuth,addOnduty)
 commonRouter.patch('/onduty-approve',jwtAuth,ondutyApprove)
+
+commonRouter.post('/leave',jwtAuth,addLeave)
+commonRouter.get('/leave',jwtAuth,leaveListing)
+commonRouter.get('/leave-list',jwtAuth,leaveListingAll)
+commonRouter.patch('/leave-approve',jwtAuth,leaveApprove)
+
+commonRouter.get('/timesheet',jwtAuth,getTimesheet)
+commonRouter.post('/timesheet',jwtAuth,addTimesheet)
 
 module.exports = commonRouter;

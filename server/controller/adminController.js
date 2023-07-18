@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Department = require("../model/Department");
 const mongoose = require('mongoose');
+const Holiday = require("../model/Holiday");
 
 const adminSignup = async (req, res) => {
   try {
@@ -249,7 +250,36 @@ const searchEmployee = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
+ const addHoliday = async(req,res) => {
+  try {
+    const {date,title} = req.body
+    console.log(req.body)
+    const existingHoliday = await Holiday.findOne({date:date})
+    console.log(existingHoliday)
+    if(existingHoliday){
+      res.status(404).json({message:"No data available"})
+    }
+    else{
+      const holiday = new Holiday({
+        date:date,
+        title:title
+      })
+      await holiday.save()
+      res.status(201).json({holiday})
+    }
+  } catch (error) {
+    console.log(error)
+  }
+ }
+ const allHoliday = async (req,res) => {
+  try {
+    const holiday = await Holiday.find()
+    if(holiday)
+    res.status(200).json({holiday})
+  } catch (error) {
+    res.status(404).json({message:"page not found"})
+  }
+ }
 module.exports = {
   adminSignup,
   departmentDetails,
@@ -258,5 +288,7 @@ module.exports = {
   employeeDetails,
   addEmployees,
   searchEmployee,
-  employeeStatus
+  employeeStatus,
+  addHoliday,
+  allHoliday
 };
