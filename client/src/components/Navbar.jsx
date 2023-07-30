@@ -25,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../redux/api/api";
 import { adminApi, employeeApi } from "../redux/api/employeeApi";
 
+
 function Navbar({ isSidebarOpen, setIsSidebarOpen, showBackground }) {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -56,7 +57,29 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen, showBackground }) {
 console.log('navbar ',response)
         setEmployee(data);
       } catch (error) {
-        console.log("Error fetching user details:", error);
+        if (error && error.status === 401) {
+          // Check if the token is expired based on the custom property "isTokenExpired"
+          if (error.data.isTokenExpired) {
+            // Show message to the user (optional)
+            console.log('Token expired. Please log in again.');
+            
+            // Clear user session (token) - this depends on how you handle the token in your app
+            // For example:
+            // localStorage.removeItem('token');
+            
+            // Redirect to login page (you can use React Router or your preferred method)
+            // For example:
+            // history.push('/login');
+          } else {
+            // Show message for other unauthorized cases (optional)
+            console.log('You are not authorized to access this page.');
+          }
+        } else {
+          // Show message for other errors (optional)
+          console.log('error',error)
+          console.log('An error occurred while fetching data.');
+        }
+      
       }
     };
 

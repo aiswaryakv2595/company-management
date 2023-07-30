@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
-import { useStyles } from '../../styles/useStyles';
-import { Button, Container, Paper, TextField, Typography } from '@material-ui/core';
+
+import { Button, Chip, Container, Paper, TextField, Typography } from '@mui/material';
 import { api } from '../../redux/api/api';
 import { useLocation, useNavigate } from 'react-router-dom';
+import LockResetIcon from '@mui/icons-material/LockReset';
+import '../../styles/style.css'
 
 const ResetPassword = () => {
-    const classes = useStyles();
+    
     const location = useLocation();
     const navigate = useNavigate()
     const [inputs, setInputs] = useState({
@@ -34,15 +36,18 @@ const ResetPassword = () => {
         }
       };
   return (
-    <div className={classes.root}>
-    <Container className={classes.container}>
-      <Paper elevation={3} className={classes.paper}>
-        <Typography variant="h5" component="h1" gutterBottom>
-          Reset Password
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            className={classes.textField}
+    <>
+  
+  <div className='root'>
+    <Paper elevation={3} className='paper'>
+    <div className='container'>
+      <Chip icon={<LockResetIcon/>} label='Reset Password' color="info" variant="filled"/>
+      </div> 
+      <div>
+      <form onSubmit={handleSubmit}>
+        <p>
+        <TextField
+            className='textField'
             label="Password"
             variant="outlined"
             fullWidth
@@ -50,8 +55,10 @@ const ResetPassword = () => {
             onChange={handleChange}
             value={inputs.password}
           />
-          <TextField
-            className={classes.textField}
+        </p>
+        <p>
+        <TextField
+            className='textField'
             label="Confirm Password"
             variant="outlined"
             type="password"
@@ -60,20 +67,20 @@ const ResetPassword = () => {
             onChange={handleChange}
             value={inputs.confirm_password}
           />
-        
-          <Button
-            className={classes.loginButton}
+        </p>
+        <Button
+            className='loginButton'
             variant="contained"
             fullWidth
             type="submit"
           >
             Reset
           </Button>
-        </form>
+      </form>
+      </div>
       </Paper>
-    </Container>
-    
-  </div>
+      </div>
+  </>
   )
 }
 

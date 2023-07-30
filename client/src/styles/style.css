@@ -1,0 +1,35 @@
+
+.root{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .paper{
+    padding: 20px; 
+    max-width: 400px;
+    width: 100%;
+  }
+  .textField{
+    margin-bottom: 10px;
+  }
+  .loginButton{
+    background-image: linear-gradient(to right,#000428, #004E92);
+    color: 'white';
+    
+  }
+  .loginButton:hover{
+    background: '#004E92',
+  }
+  .forgotPassword{
+    display: 'flex';
+    justify-content: 'flex-end';
+    margin-bottom: 10px;
+    text-decoration: none,
+    
+  }

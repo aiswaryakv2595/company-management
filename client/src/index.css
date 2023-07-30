@@ -1,12 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,600;0,800;1,100;1,200;1,300;1,500;1,600&display=swap');
 
 html,
-body,
+body{
+  font-family: 'Poppins', sans-serif;
+}
 #root,
 .app{
   height:100%;
   width: 100%;
-  font-family: "Inter",sans-serif;
+  
 }
 .department-input[title] {
   position: relative;

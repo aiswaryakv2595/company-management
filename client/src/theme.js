@@ -2,7 +2,7 @@
 export const tokensDark = {
  
     grey: {
-      0: "#eefbff", // manually adjusted
+      0: "#ffff", // manually adjusted
       10: "#f6f6f6", // manually adjusted
       50: "#f0f0f0", // manually adjusted
       100: "#e0e0e0",
@@ -19,6 +19,7 @@ export const tokensDark = {
    
     primary: {
       // blue
+      20: "#a1e1ec", //for statbox
       50:"#212a3e",
       100: "#d3d4de",
       200: "#a6a9be",
@@ -30,14 +31,16 @@ export const tokensDark = {
       800: "#0d1025",
       900: "#070812",
     },
+   
     secondary: {
       // yellow
-      20: "#FFDFB2",
+      20: "#e1f3f9",
       50: "#f0f0f0", // manually adjusted
       100: "#fff6e0",
       200: "#ffedc2",
-      300: "#ffe3a3",
-      400: "#ffda85",
+      // 300: "#ffe3a3",
+      // 400: "#ffda85",
+      300:"#35605A",
       500: "#ffd166",
       600: "#cca752",
       700: "#997d3d",
@@ -97,30 +100,30 @@ export const themeSettings = () => {
       },
     },
     typography: {
-      fontFamily: ["Inter", "sans-serif"].join(","),
+      fontFamily: ["Poppins", "sans-serif"].join(","),
       fontSize: 12,
       h1: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Poppins", "sans-serif"].join(","),
         fontSize: 40,
       },
       h2: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Poppins", "sans-serif"].join(","),
         fontSize: 32,
       },
       h3: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Poppins", "sans-serif"].join(","),
         fontSize: 24,
       },
       h4: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Poppins", "sans-serif"].join(","),
         fontSize: 20,
       },
       h5: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Poppins", "sans-serif"].join(","),
         fontSize: 16,
       },
       h6: {
-        fontFamily: ["Inter", "sans-serif"].join(","),
+        fontFamily: ["Poppins", "sans-serif"].join(","),
         fontSize: 14,
       },
     },

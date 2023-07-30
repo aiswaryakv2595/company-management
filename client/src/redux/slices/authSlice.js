@@ -6,8 +6,12 @@ const authSlice = createSlice({
     isLoggedIn: localStorage.getItem('userLoggedIn') === 'true',
     user: null,
     role: localStorage.getItem('userRole') || null,
+    adminExists: false,
   },
   reducers: {
+    setAdminExists: (state, action) => {
+      state.adminExists = action.payload;
+    },
     login(state, action) {
       state.isLoggedIn = true;
       state.user = action.payload;
@@ -25,6 +29,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout,setAdminExists } = authSlice.actions;
 
 export default authSlice.reducer;

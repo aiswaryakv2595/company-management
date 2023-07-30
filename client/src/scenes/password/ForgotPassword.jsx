@@ -1,11 +1,12 @@
-import { Button, Container, Paper, TextField, Typography } from '@material-ui/core';
+import { Button, Chip, Container, Paper, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react'
 import { api } from '../../redux/api/api';
 import { useNavigate } from 'react-router-dom';
-import { useStyles } from '../../styles/useStyles';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import '../../styles/style.css'
 
 const ForgotPassword = () => {
-    const classes = useStyles();
+    
     const [email, setEmail] = useState("")
     const navigate = useNavigate();
     const handleSubmit = async (e) => {
@@ -21,15 +22,16 @@ const ForgotPassword = () => {
       };
       
   return (
-    <div className={classes.root}>
-        <Container className={classes.container}>
-        <Paper elevation={3} className={classes.paper}>
-        <Typography variant="h5" component="h1" gutterBottom>
-            Forgot Password
-          </Typography>
-          <form onSubmit={handleSubmit}>
-          <TextField
-              className={classes.textField}
+   
+    <div className='root'>
+    <Paper elevation={3} className='paper'>
+    <div className='container'>
+      <Chip icon={<LockOpenIcon/>} label='Forgot Password' color="info" variant="filled"/>
+      </div> 
+      <form onSubmit={handleSubmit}>
+      <p>
+      <TextField
+              className='textField'
               label="Email"
               variant="outlined"
               fullWidth
@@ -37,20 +39,20 @@ const ForgotPassword = () => {
               value={email}
               onChange={(e)=>setEmail(e.target.value)}
             />
-            <Button
-              className={classes.loginButton}
+      </p>
+      <Button
+              color='info'
               variant="contained"
               fullWidth
               type="submit"
             >
               Submit
             </Button>
-          </form>
-
-        </Paper>
-
-        </Container>
+      </form>
+     
+    </Paper>
     </div>
+   
   )
 }
 

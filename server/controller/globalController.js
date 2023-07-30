@@ -5,6 +5,8 @@ const nodemailer = require("nodemailer");
 const Onduty = require("../model/Onduty");
 const Holiday = require("../model/Holiday");
 const Timesheet = require("../model/Timesheet");
+const Complaints = require("../model/Complaints");
+const moment = require("moment");
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,10 +35,10 @@ const login = async (req, res) => {
 
 const authUser = async (req, res) => {
   const employee = req.employee;
-  console.log("employee", employee);
+ 
   await employee.populate("designation");
   const designation = employee.designation;
-  console.log(employee);
+ 
   res.status(200).json({ employee: employee, designation: designation });
 };
 const updateProfile = async (req, res) => {
@@ -232,12 +234,18 @@ const ondutyApprove = async (req, res) => {
       },
       { new: true }
     ).populate("employeeID");
+    
+    // Convert the from and to dates to strings in the desired format
+    onduty.from = new Date(onduty.from).toDateString();
+    onduty.to = new Date(onduty.to).toDateString();
+
     console.log(onduty);
     res.status(200).json({ onduty });
   } catch (error) {
     res.status(500).json({ message: "something went wrong" });
   }
 };
+
 const addLeave = async (req, res) => {
   const currentDate = new Date().toISOString().split("T")[0];
   try {
@@ -338,8 +346,8 @@ const leaveApprove = async (req, res) => {
         existingLeave.earnedLeave -= leaveDuration;
       }
 
-      existingLeave.from = validLeaveDates[0];
-      existingLeave.to = validLeaveDates[validLeaveDates.length - 1];
+      // existingLeave.from = validLeaveDates[0];
+      // existingLeave.to = validLeaveDates[validLeaveDates.length - 1];
     } else if (existingLeave.leave_status === "Accepted") {
       leaveStatus = "Rejected";
       existingLeave.earnedLeave += leaveDuration;
@@ -359,12 +367,17 @@ const leaveApprove = async (req, res) => {
       },
       { new: true }
     ).populate("employeeID");
+    
+    // Convert the from and to dates to the desired formats
+    // leave.from = new Date(leave.from).toString().split(' ').slice(0, 5).join(' ');
+    // leave.to = new Date(leave.to).toString().split(' ').slice(0, 5).join(' ');
 
     res.status(200).json({ leave });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
+
 
 
 
@@ -420,7 +433,157 @@ const getTimesheet = async (req, res) => {
   res.status(500).json({message:error})
  }
  }
+ const attendanceReport = async (req, res) => {
+  try {
+    const employeeID = req.employee._id;
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
 
+    const firstDayOfMonthString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+
+    // Get the last day of the current month
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const lastDayOfMonthISO = lastDayOfMonth.toISOString();
+    const attendanceData = await Onduty.aggregate([{
+      $match: {
+        employeeID,
+        from: { $gte: firstDayOfMonthString },
+        to: { $lte: lastDayOfMonthISO },
+      },
+    }])
+    const statusCounts = await Onduty.aggregate([
+      {
+        $match: {
+          employeeID,
+          from: { $gte: firstDayOfMonthString },
+          to: { $lte: lastDayOfMonthISO },
+        },
+      },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+    const holidayCounts = await Holiday.aggregate([
+      {
+        $match: {
+         
+          date: { $gte: firstDayOfMonthString },
+          date: { $lte: lastDayOfMonthISO },
+        },
+      },
+      { $group: { _id: '$date', count: { $sum: 1 } } },
+    ]);
+
+    const ondutyTypeCounts = await Onduty.aggregate([
+      {
+        $match: {
+          employeeID,
+          from: { $gte: firstDayOfMonthString },
+          to: { $lte: lastDayOfMonthISO },
+        },
+      },
+      { $group: { _id: '$onduty_type', count: { $sum: 1 } } },
+    ]);
+   
+   
+    const finalEntry = attendanceData[attendanceData.length - 1];
+
+    
+    const totalEarnedLeave = finalEntry ? finalEntry.earnedLeave : 0;
+  
+     console.log('totalEarnedLeave',totalEarnedLeave)
+    const lopBalances = await Onduty.aggregate([
+      {
+        $match: {
+          employeeID,
+          status: 'Leave',
+          from: { $gte: firstDayOfMonthString },
+          to: { $lte: lastDayOfMonthISO },
+        },
+      },
+      { $group: { _id: null, totalLOP: { $sum: '$lop' } } },
+    ]);
+
+    res.status(200).json({
+      ondutyTypeCounts: ondutyTypeCounts,
+      lopBalance: lopBalances.length ? lopBalances[0].totalLOP : 0,
+      statusCounts: statusCounts,
+      holidayCounts:holidayCounts,
+      attendance:attendanceData,
+      balanceLeave: totalEarnedLeave,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const addComplaints = async (req,res) => {
+try {
+  console.log('stay')
+  const {subject,description} = req.body
+  console.log('body',req.body)
+  const complaints = new Complaints({
+    employeeID:req.employee._id,
+    subject:subject,
+    description:description
+  })
+  await complaints.save()
+  res.status(201).json({complaints})
+} catch (error) {
+  res.status(500).json({ error: 'Internal server error' });
+}
+}
+
+const viewComplaints = async (req,res) => {
+  try {
+    const complaints = await Complaints.find({employeeID:req.employee._id})
+    if(complaints)
+    res.status(200).json({complaints})
+    else
+    res.status(404).json({message:"no data found"})
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+const getSalary = async (req, res) => {
+  try {
+    const today = moment();
+    const startOfMonth = today.startOf("month").toDate();
+    console.log(startOfMonth)
+    const endOfMonth = today.endOf("month").toDate();
+console.log('start')
+    console.log(req.employee._id)
+    let aggregationPipeline = [
+      {
+        $match: {
+          _id: req.employee._id,
+          // Filter employees whose joining_date falls within the current month
+          "salary.from":{ $gte: startOfMonth},
+          "salary.to":{$lte: endOfMonth}
+        },
+      },
+      {
+        $lookup: {
+          from: "departments",
+          localField: "designation",
+          foreignField: "_id",
+          as: "department",
+        },
+      },
+    ];
+    
+    const salary = await Employee.aggregate(aggregationPipeline);
+    console.log(salary)
+
+    if (salary) {
+      res.status(200).json({ salary });
+    } else {
+      res.status(404).json({ message: "No salary details found for the current month." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching salary details.", error });
+  }
+};
 module.exports = {
   login,
   authUser,
@@ -437,5 +600,9 @@ module.exports = {
   leaveListingAll,
   leaveApprove,
   getTimesheet,
-  addTimesheet
+  addTimesheet,
+  attendanceReport,
+  addComplaints,
+  viewComplaints,
+  getSalary
 };

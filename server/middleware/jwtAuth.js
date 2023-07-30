@@ -22,7 +22,12 @@ const jwtAuth = async (req, res, next) => {
     req.employee = employee;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Unauthorized.' });
+    if (error instanceof jwt.TokenExpiredError) {
+     
+      res.status(401).json({ message: 'Token expired', isTokenExpired: true });
+    } else {
+      res.status(401).json({ message: 'Unauthorized.' });
+    }
   }
 };
 

@@ -14,10 +14,10 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "./public")));
-dotenv.config();
+
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/CMS')
+  .connect(process.env.MONGO_DB)
   .then(() => {
   
     const Department = require('./model/Department');
@@ -64,4 +64,3 @@ app.use('/api/admin', adminRouter);
 app.use('/api/employee', employeeRouter);
 app.use('/api/teamlead', teamleadRouter);
 app.use('/api',commonRouter)
-

@@ -1,21 +1,24 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LockIcon from '@mui/icons-material/Lock';
+import '../styles/style.css'
 import {
-  Container,
+
   Paper,
-  Typography,
+
   TextField,
   Button,
-} from "@material-ui/core";
+  Chip,
+} from "@mui/material";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/slices/authSlice";
 import { useNavigate, Link } from "react-router-dom";
-import { useStyles } from "../styles/useStyles";
+
 import authApi from "../redux/api/authApi";
 
 const LoginForm = () => {
-  const classes = useStyles();
+
   const [inputs, setInputs] = useState({
     email: "",
     password: "",
@@ -73,46 +76,48 @@ const LoginForm = () => {
     }));
   };
   return (
-    <div className={classes.root}>
-      <Container className={classes.container}>
-        <Paper elevation={3} className={classes.paper}>
-          <Typography variant="h5" component="h1" gutterBottom>
-            Login
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              className={classes.textField}
-              label="Email"
+    <div className='root'>
+    <Paper elevation={3} className='paper'>
+      <div className='container'>
+      <Chip icon={<LockIcon/>} label='Login' color="info" variant="filled"/>
+      </div>  
+      <div>
+      <form onSubmit={handleSubmit}>
+        <p>
+      <TextField label="Email"
               variant="outlined"
               fullWidth
               name="email"
               onChange={handleChange}
               value={inputs.email}
-            />
-            <TextField
-              className={classes.textField}
-              label="Password"
+              className='textField' />
+      </p>
+      <p>
+      <TextField  label="Password"
               variant="outlined"
               type="password"
               name="password"
               fullWidth
               onChange={handleChange}
               value={inputs.password}
-            />
-            <Link to="/forgot-password" className={classes.forgotPassword}>
+              className='textField' />
+      </p>
+      <p>
+      <Link to="/forgot-password" className='forgotPassword'>
               Forgot Password
             </Link>
+            </p>
             <Button
-              className={classes.loginButton}
+            color="info"
               variant="contained"
               fullWidth
               type="submit"
             >
               Login
             </Button>
-          </form>
-        </Paper>
-      </Container>
+      </form>
+      </div>
+    </Paper>
     </div>
   );
 };

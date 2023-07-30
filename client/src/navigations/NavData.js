@@ -36,16 +36,7 @@ export const navItems = [
         text: "All Employees",
         icon: <GroupsOutlined />,
       },
-      {
-        route: "admin/leaves",
-        text: "Leaves",
-        icon: <FactCheckOutlined />,
-      },
-      {
-        route: "admin/attendance",
-        text: "Attendance",
-        icon: <CoPresentOutlined />,
-      },
+     
     ],
   },
   {
@@ -101,6 +92,7 @@ export const navItems = [
     ],
   },
   {
+    route: "admin/payroll",
     text: "Payroll",
     icon: null,
     subItems: [],
@@ -189,6 +181,12 @@ export const navItemsEmp = [
     ],
   },
   {
+    route: "payroll",
+    text: "Payroll",
+    icon: null,
+    subItems: [],
+  },
+  {
     text: "Meet",
     icon: <VideoCall />,
     route: "meet",
@@ -272,11 +270,7 @@ export const navItemsteamlead = [
         text: "All Projects",
         icon: <WorkHistory />,
       },
-      {
-        route: "teamlead/view-tasks",
-        text: "All Tasks",
-        icon: <Task />,
-      },
+    
     ],
   },
 
@@ -290,6 +284,12 @@ export const navItemsteamlead = [
         icon: <DangerousOutlined />,
       },
     ],
+  },
+  {
+    route: "teamlead/payroll",
+    text: "Payroll",
+    icon: null,
+    subItems: [],
   },
   {
     text: "Meet",

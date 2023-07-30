@@ -2,22 +2,30 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../redux/api/api';
-import { Button, Container, Paper, TextField, Typography } from '@material-ui/core';
-import { useStyles } from '../../styles/useStyles';
+
+import '../../styles/style.css'
+import PasswordIcon from '@mui/icons-material/Password';
+import {
+
+  Paper,
+
+  TextField,
+  Button,
+  Chip,
+} from "@mui/material";
 
 const OtpPage = () => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const [otp, setOtp] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Send OTP to backend for verification
+      
       const res = await api.post('/verify-otp', { otp });
       console.log('OTP', otp);
       console.log(res.data);
-      // Redirect to password reset page if OTP is verified
+     
       if (res.data.verified) {
         navigate(`/reset-password`);
       } else {
@@ -29,15 +37,17 @@ const OtpPage = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <Container className={classes.container}>
-        <Paper elevation={3} className={classes.paper}>
-          <Typography variant="h5" component="h1" gutterBottom>
-            Enter OTP
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              className={classes.textField}
+    <>
+
+    <div className='root'>
+    <Paper elevation={3} className='paper'>
+    <div className='container'>
+      <Chip icon={<PasswordIcon/>} label='OTP' color="info" variant="filled"/>
+      </div> 
+      <form onSubmit={handleSubmit}>
+        <p>
+        <TextField
+              className='textField'
               label="OTP"
               variant="outlined"
               fullWidth
@@ -45,13 +55,14 @@ const OtpPage = () => {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
             />
-            <Button className={classes.loginButton} variant="contained" fullWidth type="submit">
+        </p>
+        <Button color='info' variant="contained" fullWidth type="submit">
               Enter OTP
             </Button>
-          </form>
-        </Paper>
-      </Container>
-    </div>
+      </form>
+      </Paper>
+      </div>
+    </>
   );
 };
 

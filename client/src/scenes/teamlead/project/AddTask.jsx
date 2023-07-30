@@ -20,10 +20,9 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Header from "../../../components/Header";
-import { api } from "../../../redux/api/api";
+import { teamleadApi } from "../../../redux/api/employeeApi";
 import { useSelector } from "react-redux";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { adminApi, teamleadApi } from "../../../redux/api/employeeApi";
 
 const AddTask = () => {
   const [tasks, setTasks] = useState([]);
@@ -57,15 +56,9 @@ const AddTask = () => {
 
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   useEffect(() => {
-    // Simulating API fetch
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.log("Token is null or undefined");
-      return;
-    }
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await adminApi.allEmployees();
+        const response = await teamleadApi.allEmployees();
         const data = response.employees;
 
         setEmployees(data);
@@ -81,7 +74,7 @@ const AddTask = () => {
         const data = response.project;
         setProject(data);
       } catch (error) {
-        console.log("Error fetching user details:", error);
+        console.log("Error fetching project details:", error);
       }
     };
 
@@ -100,10 +93,12 @@ const AddTask = () => {
         console.log("Error fetching tasks:", error);
       }
     };
+
     fetchProjectDetails();
     fetchEmployeeDetails();
     fetchTasks();
   }, [isLoggedIn]);
+
   const handleAddTask = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -116,14 +111,14 @@ const AddTask = () => {
       const response = await teamleadApi.addTask(inputs, projectId);
 
       const newTask = response.task;
-      console.log("task", newTask);
-      setTasks(newTask);
-      toast.success("Task Added successfully");
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+      toast.success("Task added successfully");
       setIsModalOpen(false);
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message);
     }
   };
+
   const handleEdit = (task) => {
     setEditedTask(task);
     setInputs({
@@ -137,38 +132,78 @@ const AddTask = () => {
     setIsEditMode(true);
     setIsModalOpen(true);
   };
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
 
-    const { source, destination } = result;
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    )
+  const onDragStart = (start) => {
+    const { draggableId } = start;
+    const task = tasks.find((t) => t._id === draggableId);
+
+    setEditedTask(task);
+  };
+
+  const onDragEnd = async (result) => {
+    const { destination, source } = result;
+
+    if (!destination) {
       return;
+    }
 
-    const updatedTasks = [...tasks];
-    const movedTask = updatedTasks.find(
-      (task) => task._id === result.draggableId
-    );
-    if (!movedTask) return;
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
 
-    movedTask.status = destination.droppableId.split("-")[1];
-    updatedTasks.splice(source.index, 1);
-    updatedTasks.splice(destination.index, 0, movedTask);
+    const updatedTasks = Array.from(tasks);
 
-    setTasks(updatedTasks);
+    // Reorder within the same column
+    if (destination.droppableId === source.droppableId) {
+      const columnTasks = updatedTasks.filter(
+        (task) => task.status === source.droppableId
+      );
 
-    try {
-      await teamleadApi.updateTask({
-        task_id: movedTask._id,
-        status: movedTask.status,
+      const [movedTask] = columnTasks.splice(source.index, 1);
+      columnTasks.splice(destination.index, 0, movedTask);
+
+      updatedTasks.forEach((task, index) => {
+        if (task.status === source.droppableId) {
+          task.position = index;
+        }
+      });
+    } else {
+      // Move to a different column
+      const sourceTasks = updatedTasks.filter(
+        (task) => task.status === source.droppableId
+      );
+      const destinationTasks = updatedTasks.filter(
+        (task) => task.status === destination.droppableId
+      );
+
+      const [movedTask] = sourceTasks.splice(source.index, 1);
+      movedTask.status = destination.droppableId;
+      destinationTasks.splice(destination.index, 0, movedTask);
+
+      updatedTasks.forEach((task, index) => {
+        if (task.status === source.droppableId) {
+          task.position = index;
+        } else if (task.status === destination.droppableId) {
+          task.position = index;
+        }
       });
 
-      toast.success(`Moved to ${movedTask.status}`);
-    } catch (error) {
-      console.log("Error updating task status:", error);
+      // Update the task status in the backend
+      try {
+        await teamleadApi.updateTask({
+          task_id: movedTask._id,
+          status: destination.droppableId,
+        });
+      } catch (error) {
+        console.log("Error updating task status:", error);
+        // You can handle the error accordingly
+      }
     }
+
+    setTasks(updatedTasks);
   };
 
   return (
@@ -176,7 +211,10 @@ const AddTask = () => {
       {tasks.length > 0 && (
         <Header title={project.project_name} subtitle="Task Details" />
       )}
-      <DragDropContext onDragEnd={handleDragEnd}>
+      <DragDropContext
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      >
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <Paper sx={{ p: 2 }}>
@@ -184,136 +222,135 @@ const AddTask = () => {
               <Button variant="contained" onClick={() => setIsModalOpen(true)}>
                 Add Task
               </Button>
-              <Droppable droppableId="column-todo">
+              <Droppable droppableId="todo">
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {Array.isArray(tasks) &&
-                      tasks
-                        .filter((task) => task.status === "todo")
-                        .map((task, index) => (
-                          <Draggable
-                            key={task._id}
-                            draggableId={task._id}
-                            index={index}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <Card sx={{ mb: 2 }}>
-                                  <CardContent>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
+                    {tasks
+                      .filter((task) => task.status === "todo")
+                      .map((task, index) => (
+                        <Draggable
+                          key={task._id}
+                          draggableId={task._id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <Card sx={{ mb: 2 }}>
+                                <CardContent>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                    }}
+                                  >
+                                    <Typography variant="h6" gutterBottom>
+                                      Title: {task.title}
+                                    </Typography>
+                                    <IconButton
+                                      onClick={handleClick}
+                                      size="small"
+                                      sx={{ ml: 2 }}
+                                      aria-controls={
+                                        open ? "account-menu" : undefined
+                                      }
+                                      aria-haspopup="true"
+                                      aria-expanded={
+                                        open ? "true" : undefined
+                                      }
+                                    >
+                                      <MoreVertIcon />
+                                    </IconButton>
+                                    <Menu
+                                      id="lock-menu"
+                                      anchorEl={anchorEl}
+                                      open={open}
+                                      onClose={handleClose}
+                                      MenuListProps={{
+                                        "aria-labelledby": "lock-button",
+                                        role: "listbox",
                                       }}
                                     >
-                                      <Typography variant="h6" gutterBottom>
-                                        Title: {task.title}
-                                      </Typography>
-                                      <IconButton
-                                        onClick={handleClick}
-                                        size="small"
-                                        sx={{ ml: 2 }}
-                                        aria-controls={
-                                          open ? "account-menu" : undefined
-                                        }
-                                        aria-haspopup="true"
-                                        aria-expanded={
-                                          open ? "true" : undefined
-                                        }
+                                      <MenuItem
+                                        onClick={handleEdit.bind(null, task)}
                                       >
-                                        <MoreVertIcon />
-                                      </IconButton>
-                                      <Menu
-                                        id="lock-menu"
-                                        anchorEl={anchorEl}
-                                        open={open}
-                                        onClose={handleClose}
-                                        MenuListProps={{
-                                          "aria-labelledby": "lock-button",
-                                          role: "listbox",
-                                        }}
-                                      >
-                                        <MenuItem
-                                          onClick={handleEdit.bind(null, task)}
-                                        >
-                                          Edit
-                                        </MenuItem>
-                                      </Menu>
-                                    </Box>
+                                        Edit
+                                      </MenuItem>
+                                    </Menu>
+                                  </Box>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Description: {task.description}
+                                  </Typography>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "flex-end",
+                                    }}
+                                  >
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"
                                     >
-                                      Description : {task.description}
+                                      Assigned to{" "}
+                                      {task.assigned_to.first_name}
                                     </Typography>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        justifyContent: "flex-end",
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                      >
-                                        Assigned to{" "}
-                                        {task.assigned_to.first_name}
-                                      </Typography>
-                                      <Avatar
-                                        src={
-                                          task.assigned_to.profilePic
-                                            ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
-                                            : ""
-                                        }
-                                      />
-                                    </Box>
-                                    <LinearProgress
-                                      variant="determinate"
-                                      value={25}
-                                      sx={{
-                                        "& .MuiLinearProgress-bar": {
-                                          backgroundColor: "blue",
-                                        },
-                                      }}
+                                    <Avatar
+                                      src={
+                                        task.assigned_to.profilePic
+                                          ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                          : ""
+                                      }
                                     />
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        mt: 1,
-                                      }}
-                                    >
-                                      <AccessTimeIcon />
-                                      <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ ml: 1 }}
-                                      >
-                                        {new Date(
-                                          task.due_date
-                                        ).toLocaleDateString(undefined, {
-                                          month: "short",
-                                          day: "numeric",
-                                        })}
-                                      </Typography>
-                                    </Box>
+                                  </Box>
+                                  <LinearProgress
+                                    variant="determinate"
+                                    value={25}
+                                    sx={{
+                                      "& .MuiLinearProgress-bar": {
+                                        backgroundColor: "blue",
+                                      },
+                                    }}
+                                  />
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    <AccessTimeIcon />
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"
+                                      sx={{ ml: 1 }}
                                     >
-                                      Priority {task.priority}
+                                      {new Date(
+                                        task.due_date
+                                      ).toLocaleDateString(undefined, {
+                                        month: "short",
+                                        day: "numeric",
+                                      })}
                                     </Typography>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
+                                  </Box>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Priority: {task.priority}
+                                  </Typography>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
                     {provided.placeholder}
                   </div>
                 )}
@@ -323,98 +360,97 @@ const AddTask = () => {
           <Grid item xs={4}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">Ongoing</Typography>
-              <Droppable droppableId="column-ongoing">
+              <Droppable droppableId="ongoing">
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {Array.isArray(tasks) &&
-                      tasks
-                        .filter((task) => task.status === "ongoing")
-                        .map((task, index) => (
-                          <Draggable
-                            key={task._id}
-                            draggableId={task._id}
-                            index={index}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <Card sx={{ mb: 2 }}>
-                                  <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                      Title: {task.title}
-                                    </Typography>
+                    {tasks
+                      .filter((task) => task.status === "ongoing")
+                      .map((task, index) => (
+                        <Draggable
+                          key={task._id}
+                          draggableId={task._id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <Card sx={{ mb: 2 }}>
+                                <CardContent>
+                                  <Typography variant="h6" gutterBottom>
+                                    Title: {task.title}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Description: {task.description}
+                                  </Typography>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "flex-end",
+                                    }}
+                                  >
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"
                                     >
-                                      Description : {task.description}
+                                      Assigned to{" "}
+                                      {task.assigned_to.first_name}
                                     </Typography>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        justifyContent: "flex-end",
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                      >
-                                        Assigned to{" "}
-                                        {task.assigned_to.first_name}
-                                      </Typography>
-                                      <Avatar
-                                        src={
-                                          task.assigned_to.profilePic
-                                            ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
-                                            : ""
-                                        }
-                                      />
-                                    </Box>
-                                    <LinearProgress
-                                      variant="determinate"
-                                      value={50}
-                                      sx={{
-                                        "& .MuiLinearProgress-bar": {
-                                          backgroundColor: "blue",
-                                        },
-                                      }}
+                                    <Avatar
+                                      src={
+                                        task.assigned_to.profilePic
+                                          ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                          : ""
+                                      }
                                     />
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        mt: 1,
-                                      }}
-                                    >
-                                      <AccessTimeIcon />
-                                      <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ ml: 1 }}
-                                      >
-                                        {new Date(
-                                          task.due_date
-                                        ).toLocaleDateString(undefined, {
-                                          month: "short",
-                                          day: "numeric",
-                                        })}
-                                      </Typography>
-                                    </Box>
+                                  </Box>
+                                  <LinearProgress
+                                    variant="determinate"
+                                    value={50}
+                                    sx={{
+                                      "& .MuiLinearProgress-bar": {
+                                        backgroundColor: "blue",
+                                      },
+                                    }}
+                                  />
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    <AccessTimeIcon />
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"
+                                      sx={{ ml: 1 }}
                                     >
-                                      Priority {task.priority}
+                                      {new Date(
+                                        task.due_date
+                                      ).toLocaleDateString(undefined, {
+                                        month: "short",
+                                        day: "numeric",
+                                      })}
                                     </Typography>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
+                                  </Box>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Priority: {task.priority}
+                                  </Typography>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
                     {provided.placeholder}
                   </div>
                 )}
@@ -424,98 +460,97 @@ const AddTask = () => {
           <Grid item xs={4}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">Complete</Typography>
-              <Droppable droppableId="column-complete">
+              <Droppable droppableId="complete">
                 {(provided) => (
                   <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {Array.isArray(tasks) &&
-                      tasks
-                        .filter((task) => task.status === "complete")
-                        .map((task, index) => (
-                          <Draggable
-                            key={task._id}
-                            draggableId={task._id}
-                            index={index}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                              >
-                                <Card sx={{ mb: 2 }}>
-                                  <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                      Title: {task.title}
-                                    </Typography>
+                    {tasks
+                      .filter((task) => task.status === "complete")
+                      .map((task, index) => (
+                        <Draggable
+                          key={task._id}
+                          draggableId={task._id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <Card sx={{ mb: 2 }}>
+                                <CardContent>
+                                  <Typography variant="h6" gutterBottom>
+                                    Title: {task.title}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Description: {task.description}
+                                  </Typography>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "flex-end",
+                                    }}
+                                  >
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"
                                     >
-                                      Description : {task.description}
+                                      Assigned to{" "}
+                                      {task.assigned_to.first_name}
                                     </Typography>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        justifyContent: "flex-end",
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                      >
-                                        Assigned to{" "}
-                                        {task.assigned_to.first_name}
-                                      </Typography>
-                                      <Avatar
-                                        src={
-                                          task.assigned_to.profilePic
-                                            ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
-                                            : ""
-                                        }
-                                      />
-                                    </Box>
-                                    <LinearProgress
-                                      variant="determinate"
-                                      value={100}
-                                      sx={{
-                                        "& .MuiLinearProgress-bar": {
-                                          backgroundColor: "blue",
-                                        },
-                                      }}
+                                    <Avatar
+                                      src={
+                                        task.assigned_to.profilePic
+                                          ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                          : ""
+                                      }
                                     />
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        mt: 1,
-                                      }}
-                                    >
-                                      <AccessTimeIcon />
-                                      <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ ml: 1 }}
-                                      >
-                                        {new Date(
-                                          task.due_date
-                                        ).toLocaleDateString(undefined, {
-                                          month: "short",
-                                          day: "numeric",
-                                        })}
-                                      </Typography>
-                                    </Box>
+                                  </Box>
+                                  <LinearProgress
+                                    variant="determinate"
+                                    value={100}
+                                    sx={{
+                                      "& .MuiLinearProgress-bar": {
+                                        backgroundColor: "blue",
+                                      },
+                                    }}
+                                  />
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    <AccessTimeIcon />
                                     <Typography
                                       variant="body2"
                                       color="text.secondary"
+                                      sx={{ ml: 1 }}
                                     >
-                                      Priority {task.priority}
+                                      {new Date(
+                                        task.due_date
+                                      ).toLocaleDateString(undefined, {
+                                        month: "short",
+                                        day: "numeric",
+                                      })}
                                     </Typography>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
+                                  </Box>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Priority: {task.priority}
+                                  </Typography>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
                     {provided.placeholder}
                   </div>
                 )}
@@ -538,7 +573,7 @@ const AddTask = () => {
           }}
         >
           <Typography variant="h6" gutterBottom>
-            Add Task
+            {isEditMode ? "Edit Task" : "Add Task"}
           </Typography>
           <TextField
             label="Task Name"
@@ -548,7 +583,6 @@ const AddTask = () => {
             fullWidth
             sx={{ mb: 2 }}
           />
-
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -611,7 +645,7 @@ const AddTask = () => {
             sx={{ mb: 2 }}
           />
           <Button variant="contained" onClick={handleAddTask}>
-            Add
+            {isEditMode ? "Update" : "Add"}
           </Button>
         </Box>
       </Modal>

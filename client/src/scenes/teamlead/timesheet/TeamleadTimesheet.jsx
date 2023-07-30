@@ -8,6 +8,7 @@ import { adminApi, dutyApi, teamleadApi } from "../../../redux/api/employeeApi";
 import EditIcon from "@mui/icons-material/Edit";
 import Grid from '@mui/material/Unstable_Grid2';
 import { DataGrid } from "@mui/x-data-grid";
+import moment from "moment"; 
 
 const TeamleadTimesheet = () => {
   const theme = useTheme();
@@ -25,6 +26,9 @@ const TeamleadTimesheet = () => {
     task: "",
     time:""
   });
+  const formatDate = (date) => {
+    return moment(date).format("DD-MM-YYYY");
+  };
  
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,7 +120,12 @@ const TeamleadTimesheet = () => {
   }));
   const columns = [
     { field: "slNo", headerName: "SL No", width: 70 },
-    { field: "date", headerName: "Date", width: 200 },
+    {
+      field: "date",
+      headerName: "Date",
+      width: 200,
+      valueGetter: (params) => formatDate(params.row.date), 
+    },
     
     {
         field: "project_id",

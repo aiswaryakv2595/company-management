@@ -127,18 +127,21 @@ const AllProjects = () => {
   return (
     <Box m="1.5rem 2.5rem">
       <Header title="All Projects" subtitle="Project Details" />
-      <Box display="flex" justifyContent="flex-end" mb="20px">
+      <Grid container spacing={2} justifyContent="flex-end" marginBottom={1}>
+      <Grid item xs={6} md={3}>
         <Button
           variant="contained"
           sx={{
             bgcolor: theme.palette.primary[50],
             color: theme.palette.secondary[1000],
+            width: "100%",
           }}
           onClick={() => setOpenModal(true)}
         >
           + Add Project
         </Button>
-      </Box>
+        </Grid>
+      </Grid>
       {project && project.length > 0 ? (
         <Box mt="20px" display="flex" flexWrap="wrap" gap={2}>
           {project?.map((prj) => (

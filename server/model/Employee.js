@@ -31,7 +31,20 @@ const employeeSchema = new mongoose.Schema({
   isActive:{
     type:Boolean,
     default:true
-  }
+  },
+  salary:[
+    {
+      base_salary:Number,
+      rent_allowance:Number,
+      pf:Number,
+      lop_deduction:Number,
+      net_salary:Number,
+      total_salary:Number,
+      total_deduction:Number,
+      from:Date,
+      to:Date
+    }
+  ]
 });
 
 // Pre-save middleware to generate emp_id

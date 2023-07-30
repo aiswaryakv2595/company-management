@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import moment from "moment";
 import {
   Box,
   Button,
@@ -16,6 +17,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import Header from "../../../components/Header";
 import { adminApi } from "../../../redux/api/employeeApi";
+import FlexBetween from "../../../components/FlexBetween";
 
 const AllEmployees = () => {
   const isMobile = useMediaQuery("(min-width:1000px)");
@@ -47,6 +49,8 @@ const AllEmployees = () => {
   const [isEmailValid, setEmailValid] = useState(true);
   const [isPasswordValid, setPasswordValid] = useState(true);
   const [isPhoneValid, setPhoneValid] = useState(true);
+  const [isDateOfBirthValid, setDateOfBirthValid] = useState(true);
+  const [isJoinDateValid, setJoinDateValid] = useState(true);
   // Columns configuration
   const columns = [
     { field: "emp_id", headerName: "ID", width: 80 },
@@ -95,24 +99,10 @@ const AllEmployees = () => {
     },
   ];
 
-  // Rest of the component code...
-
-  const handleChange = (e) => {
-    setInputs((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-  //search
-  const handleSearch = (e) => {
-    setSearchInputs((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
+  // Fetch departments and user details on login
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   const theme = useTheme();
+
   const fetchUserDetails = async () => {
     try {
       const response = await adminApi.allEmployees();
@@ -138,8 +128,69 @@ const AllEmployees = () => {
       fetchDepartment();
     }
   }, [isLoggedIn]);
-  //add user
+ // Calculate age from date of birth
+ const calculateAge = (dateOfBirth) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
 
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+    const date = new Date(value);
+    if (name === "dob") {
+      const dateOfBirth = new Date(value);
+
+      const minDate = new Date();
+      minDate.setFullYear(minDate.getFullYear() - 18);
+
+      if (dateOfBirth <= minDate) {
+        setDateOfBirthValid(true);
+      } else {
+        setDateOfBirthValid(false);
+      }
+
+      // Calculate and update age
+      const age = calculateAge(dateOfBirth);
+      setInputs((prevInputs) => ({
+        ...prevInputs,
+        age: age.toString(), // Convert age to string for TextField
+      }));
+    }
+    if (name === "joining_date") {
+   
+      const joinDate = date;
+  
+      const minDate = new Date();
+      minDate.setFullYear(minDate.getFullYear() - 5);
+  
+      if (joinDate >= minDate) {
+        setJoinDateValid(true);
+      } else {
+        setJoinDateValid(false);
+      }
+    }
+  };
+
+  // Handle search inputs
+  const handleSearch = (e) => {
+    setSearchInputs((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
   const handleAddEmployee = async () => {
     try {
       let isValid = true;
@@ -208,23 +259,23 @@ const AllEmployees = () => {
 
   const handleSearchEmployee = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
 
       const response = await adminApi.searchEmployee(searchInputs);
 
       const search = response.search;
-      console.log("search Employee:", search);
-
+      const found = response.found;
+  
+      if (!found) {
+        toast.info("No matching records found");
+      }
+  
       setEmployee(search);
     } catch (error) {
       console.log("Error searching employee:", error);
     }
   };
+   // Initialize the minDateOfBirth state in useEffect
+ 
   const handleBlock = async (employeeId) => {
     try {
       const response = await adminApi.blockEmployee({ id: employeeId });
@@ -243,28 +294,26 @@ const AllEmployees = () => {
   return (
     <Box m="1.5rem 2.5rem">
       <Header title="All Employees" subtitle="Employee Details" />
-      <Box display="flex" justifyContent="flex-end" mb="20px">
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: theme.palette.primary[50],
-            color: theme.palette.secondary[1000],
-          }}
-          onClick={() => setOpenModal(true)}
-        >
-          + Add Employee
-        </Button>
-      </Box>
-      <Box
-        display="flex"
-        flexDirection={isMobile ? "row" : "column"}
-        justifyContent="flex-start"
-        alignItems="center"
-        flexWrap="wrap"
-        gap={1}
-        mb="20px"
-      >
-        <TextField
+     
+      <Grid container spacing={2} justifyContent="flex-end" marginBottom={1}>
+      <Grid item xs={6} md={3}>
+          <Button
+            variant="contained"
+            sx={{
+              bgcolor: theme.palette.primary[50],
+              color: theme.palette.secondary[1000],
+              width: "100%", 
+            }}
+            onClick={() => setOpenModal(true)}
+          >
+            + Add Employee
+          </Button>
+        </Grid>
+        </Grid>
+     
+      <Grid container spacing={2}>
+      <Grid item xs={12} md={3}>
+      <TextField
           id="outlined-basic"
           label="Employee ID"
           variant="outlined"
@@ -273,25 +322,27 @@ const AllEmployees = () => {
           onChange={handleSearch}
           sx={{ minWidth: 100, mb: isMobile ? 0 : 1 }}
         />
-
-        <TextField
+      </Grid>
+      <Grid item xs={12} md={3}>
+      <TextField
           id="outlined-basic"
           label="Employee Name"
           variant="outlined"
           name="employeeName"
           value={searchInputs.employeeName}
           onChange={handleSearch}
-          sx={{ minWidth: 150, mb: isMobile ? 0 : 1 }}
+         
         />
-
-        <TextField
+      </Grid>
+      <Grid item xs={12} md={3}>
+      <TextField
           select
           label="Designation"
           variant="outlined"
           name="designation"
           value={searchInputs.designation}
           onChange={handleSearch}
-          sx={{ minWidth: 250, mb: isMobile ? 0 : 1 }}
+          sx={{ minWidth: 230}}
         >
           {department.map((dept) => (
             <MenuItem key={dept._id} value={dept._id}>
@@ -299,21 +350,28 @@ const AllEmployees = () => {
             </MenuItem>
           ))}
         </TextField>
-        <Button
+      </Grid>
+      <Grid item xs={12} md={3}>
+      <Button
           variant="contained"
           color="success"
           onClick={handleSearchEmployee}
           sx={{
             padding: "10px",
-            minWidth: 200,
+            width:"100%",
             backgroundColor: "#f27457",
-            mb: isMobile ? 0 : 1,
+           
           }}
         >
           Search
         </Button>
-      </Box>
+      </Grid>
+      </Grid>
 
+
+
+
+    
       {employee.length > 0 ? (
         <Box mt="20px">
           <DataGrid
@@ -322,7 +380,7 @@ const AllEmployees = () => {
             getRowId={(row) => row._id}
             initialState={{
               pagination: {
-                paginationModel: { page: 0, pageSize: 5 },
+                paginationModel: { page: 0, pageSize: isMobile ? 3 : 5 }, 
               },
             }}
             autoHeight
@@ -330,7 +388,9 @@ const AllEmployees = () => {
             disableSelectionOnClick
           />
         </Box>
-      ) : null}
+      ) : <Typography variant="h6" align="center" color="textSecondary">
+      No matching records found
+    </Typography>}
       {/* Add User Modal */}
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
         {/* Modal Content */}
@@ -404,7 +464,7 @@ const AllEmployees = () => {
 
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <TextField
+              <TextField
                   label="Joining Date"
                   type="date"
                   name="joining_date"
@@ -413,11 +473,16 @@ const AllEmployees = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  inputProps={{
+                    max: moment().format("YYYY-MM-DD"),
+                  }}
+                  error={!isJoinDateValid}
+                  helperText={!isJoinDateValid && "Invalid entry"}
                   required
                 />
               </Grid>
               <Grid item xs={6}>
-                <TextField
+              <TextField
                   label="Date of birth"
                   type="date"
                   name="dob"
@@ -426,6 +491,11 @@ const AllEmployees = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  inputProps={{
+                    max: moment().format("YYYY-MM-DD"),
+                  }}
+                  error={!isDateOfBirthValid}
+                  helperText={!isDateOfBirthValid && "Date of Birth should be at least 18 years ago"}
                   required
                 />
               </Grid>

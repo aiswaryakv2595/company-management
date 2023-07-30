@@ -2,10 +2,12 @@ const express = require('express')
 const multer = require('../middleware/multer')
 const { jwtAuth } = require('../middleware/jwtAuth')
 const { viewTeamleadProject, addTask, viewTask, updateStatus } = require('../controller/projectController')
-const teamleadRoutes = express.Router()
+const { dashboard } = require('../controller/teamleadController')
+const teamLeadRoutes = express.Router()
 
-teamleadRoutes.get('/view-project',jwtAuth,viewTeamleadProject)
-teamleadRoutes.post('/addtask',jwtAuth,addTask)
-teamleadRoutes.get('/view-task',jwtAuth,viewTask)
-// teamleadRoutes.post('/update-task-status',jwtAuth,updateStatus)
-module.exports = teamleadRoutes
+teamLeadRoutes.get('/view-project',jwtAuth,viewTeamleadProject)
+teamLeadRoutes.post('/addtask',jwtAuth,addTask)
+teamLeadRoutes.get('/view-task',jwtAuth,viewTask)
+
+teamLeadRoutes.get('/dashboard',jwtAuth,dashboard)
+module.exports = teamLeadRoutes
