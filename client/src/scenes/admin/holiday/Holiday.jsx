@@ -6,6 +6,8 @@ import { adminApi } from '../../../redux/api/employeeApi';
 import { DataGrid } from '@mui/x-data-grid';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import moment from 'moment';
+
 
 const Holiday = () => {
     const theme = useTheme();
@@ -62,7 +64,12 @@ const Holiday = () => {
     
       const columns = [
         { field: "slNo", headerName: "SL No", width: 200 },
-        { field: "date", headerName: "Date", width: 200 },
+        { field: "date", headerName: "Date", width: 200,
+        valueGetter: (params) => {
+          const formattedDate = moment(params.value).format("DD-MM-YYYY");
+          return formattedDate;
+        },
+      },
         { field: "title", headerName: "Title", width: 250 },
         {
           field: "actions",

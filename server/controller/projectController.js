@@ -4,10 +4,25 @@ const Project = require("../model/Project");
 
 const viewAllProject = async (req, res) => {
   try {
-    const project = await Project.find().populate("assigned_to task.assigned_to");
+    const projects = await Project.find().populate("assigned_to task.assigned_to");
     
-    if (project) {
-      res.status(200).json({ project });
+    if (projects) {
+      const progressMap = {
+        todo: 0,
+        ongoing: 0,
+        complete: 0,
+      };
+     
+    projects.forEach((project) => {
+      project.task.forEach((task) => {
+        progressMap[task.status]++;
+      });
+    });
+    const totalTasks = projects.reduce((acc, project) => acc + project.task.length, 0);
+    const progressValue = Math.floor(
+      (progressMap.complete * 100) / totalTasks
+    );
+      res.status(200).json({ project:projects,progress: progressValue });
     } else {
       res.status(404).json({ message: "Projects not found" });
     }
@@ -146,9 +161,9 @@ const addTask = async (req, res) => {
       due_date,
       assigned_to,
       priority,
-      status: 'todo' // Set the initial status to 'todo'
+      status: 'todo' 
     };
-    console.log(task)
+ 
 
     const updatedProject = await Project.findByIdAndUpdate(
       project_id,

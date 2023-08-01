@@ -21,7 +21,8 @@ axiosClient.interceptors.request.use(async config => {
     const multipartApis = [
       '/admin/addproject',
       '/admin/edit-project',
-      '/details'
+      '/details',
+      '/update-profile'
       
     ];
   

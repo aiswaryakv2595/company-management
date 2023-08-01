@@ -461,12 +461,12 @@ const addSalary = async (req, res) => {
       return res.status(400).json({ error: 'Salary entry already exists for the given dates.' });
     }
     const ondutyEntry = await Onduty.findOne({ employeeID });
-    const lopCount = ondutyEntry.lop?ondutyEntry.lop:0;
+    const lopCount = ondutyEntry?.lop || 0;
     const net_salary = Number(base_salary)+Number(rent_allowance)
     const total_deduction = Number(pf)+Number((lopCount*lop_deduction))
    const total_salary = net_salary-total_deduction
    console.log(total_salary)
-    // If no existing entry found, proceed to add the new salary entry
+    
     const newSalary = {
       base_salary,
       rent_allowance,
@@ -501,7 +501,6 @@ const getEmployeeSalary = async (req, res) => {
       {
         $match: {
           role: { $ne: "admin" },
-          // Filter employees whose joining_date falls within the current month
           "salary.from":{ $gte: startOfMonth},
           "salary.to":{$lte: endOfMonth}
         },

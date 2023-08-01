@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
-import { api } from "../../redux/api/api";
+import { api, baseURL } from "../../redux/api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { PhotoCamera } from "@mui/icons-material";
 import "react-datepicker/dist/react-datepicker.css";
@@ -76,6 +76,7 @@ const ProfileSettings = () => {
   const handleUpdateProfile = async () => {
     try {
       const formData = new FormData();
+      console.log("Form values before sending:", formValues);
       formData.append("phone", formValues.phone);
       formData.append("email", formValues.email);
       formData.append("gender", formValues.gender);
@@ -119,9 +120,10 @@ const ProfileSettings = () => {
             alt="Profile Picture"
             src={
               employee.profilePic
-                ? `http://localhost:5000/dp/${employee.profilePic}`
+                ? `${baseURL}/dp/${employee.profilePic}`
                 : ""
             }
+            
             sx={{
               width: 150,
               height: 150,
@@ -136,6 +138,7 @@ const ProfileSettings = () => {
                 hidden
                 accept="image/*"
                 type="file"
+                name="profilePic"
                 onChange={handleProfilePicChange}
               />
               <PhotoCamera sx={{ color: "black" }} />

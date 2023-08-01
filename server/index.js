@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, "./public")));
 
 
 mongoose
-  .connect('mongodb+srv://aiswaryakv2595:me9RwGhUFs0CxNUz@cluster0.ikubkid.mongodb.net/')
+  .connect(process.env.CMS)
   .then(() => {
   
     const Department = require('./model/Department');

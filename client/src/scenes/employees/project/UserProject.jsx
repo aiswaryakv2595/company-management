@@ -28,6 +28,9 @@ const UserProject = () => {
         fetchProjectDetails()
       }
     }, [isLoggedIn])
+    const renderHTMLContent = (htmlContent) => {
+      return { __html: htmlContent };
+    };
     const handleTask = async (projectId) => {
      
         navigate(`/view-task?id=${projectId}`)
@@ -66,9 +69,11 @@ const UserProject = () => {
                 <Typography variant="h6" gutterBottom>
         Status: {prj.status}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-        {prj.description}
-        </Typography>
+        <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  dangerouslySetInnerHTML={renderHTMLContent(prj.description)}
+                />
         <Typography variant="h6" gutterBottom sx={{mt:2}}>
         Deadline:
         <Typography 

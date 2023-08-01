@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { api } from "../../../redux/api/api";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import {
-  Avatar,
-  AvatarGroup,
   Box,
   Button,
   Card,
@@ -29,6 +28,9 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header";
 import { adminApi, projectApi } from "../../../redux/api/employeeApi";
+import { quillFormats, quillModules } from "../../../styles/texteditor/quillModules";
+
+
 
 const AllProjects = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -49,10 +51,17 @@ const AllProjects = () => {
     description: "",
   });
   const [selectedImage, setSelectedImage] = useState(null);
+  const [progress, setProgress] = useState(0)
   const handleChange = (e) => {
     setInputs((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }));
+  };
+  const handleDescriptionChange = (value) => {
+    setInputs((prev) => ({
+      ...prev,
+      description: value,
     }));
   };
   const handleImageSelect = (event) => {
@@ -67,12 +76,13 @@ const AllProjects = () => {
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
-        const response = await projectApi.getAllProject()
+        const response = await projectApi.getAllProject();
 
         const data = response.project;
-      
+        setProgress(response.progress)
+        console.log(response)
+
         setProject(data);
-       
       } catch (error) {
         console.log("Error fetching project details:", error);
       }
@@ -96,7 +106,6 @@ const AllProjects = () => {
 
   const handleAddProject = async () => {
     try {
-     
       const formData = new FormData();
       formData.append("attachment", selectedImage, selectedImage?.name);
 
@@ -132,149 +141,153 @@ const AllProjects = () => {
     <Box m="1.5rem 2.5rem">
       <Header title="All Projects" subtitle="Project Details" />
       <Grid container spacing={2} justifyContent="flex-end" marginBottom={1}>
-      <Grid item xs={6} md={3}>
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: theme.palette.primary[50],
-            color: theme.palette.secondary[1000],
-            width: "100%",
-          }}
-          onClick={() => setOpenModal(true)}
-        >
-          + Add Project
-        </Button>
+        <Grid item xs={6} md={3}>
+          <Button
+            variant="contained"
+            sx={{
+              bgcolor: theme.palette.primary[50],
+              color: theme.palette.secondary[1000],
+              width: "100%",
+            }}
+            onClick={() => setOpenModal(true)}
+          >
+            + Add Project
+          </Button>
         </Grid>
       </Grid>
       {project && project.length > 0 ? (
         <Grid container spacing={2}>
           {project?.map((prj) => (
             <Grid item xs={12} md={4}>
-            <Card
-              key={prj._id}
-              sx={{
-                maxWidth: 345,
-              }}
-            >
-              <CardHeader
-                action={
-                  <>
-                    <Link to={`/admin/edit-project/${prj._id}`}>
-                      <IconButton
-                        aria-label="settings"
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "orange",
-                          },
-                          "&:hover svg": {
-                            color: "white",
-                          },
-                          borderRadius: "50%",
-                          width: "36px",
-                          height: "36px",
-                          padding: "4px",
-                          backgroundColor: "transparent",
-                        }}
-                      >
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
+              <Card
+                key={prj._id}
+                sx={{
+                  maxWidth: 345,
+                }}
+              >
+                <CardHeader
+                  action={
+                    <>
+                      <Link to={`/admin/edit-project/${prj._id}`}>
+                        <IconButton
+                          aria-label="settings"
                           sx={{
-                            width: "100%",
-                            height: "100%",
+                            "&:hover": {
+                              backgroundColor: "orange",
+                            },
+                            "&:hover svg": {
+                              color: "white",
+                            },
                             borderRadius: "50%",
-                            backgroundColor: "inherit",
-                            transition: "background-color 0.3s ease",
+                            width: "36px",
+                            height: "36px",
+                            padding: "4px",
+                            backgroundColor: "transparent",
                           }}
                         >
-                          <EditCalendar sx={{ color: "green" }} />
-                        </Box>
-                      </IconButton>
-                    </Link>
-                  </>
-                }
-                title={prj.project_name}
-                subheader={new Date(prj.starting_time).toLocaleDateString()}
-              />
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Status: {prj.status}
-                </Typography>
-                <Grid container spacing={2} sx={{ mb: 1 }}>
-                  <Grid item xs={12} sm={6}>
-                    <Box display="flex" alignItems="center" mt={2}>
-                      <AttachmentOutlined sx={{ marginRight: "5px" }} />
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        onClick={() => handleDownloadAttachment(prj.attachment)}
-                        sx={{
-                          marginLeft: "5px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        1 File
-                      </Typography>
-                      <IconButton
-                        aria-label="download attachment"
-                        onClick={() => handleDownloadAttachment(prj.attachment)}
-                        sx={{ marginLeft: "5px" }}
-                      ></IconButton>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Box display="flex" alignItems="center" mt={2}>
-                      <Diversity3 sx={{ marginRight: "8px" }} />
-                      <Typography variant="body2">
-           {prj.assigned_to.first_name}
-          </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-               
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                  Deadline:
-                  <Typography
-                    gutterBottom
-                    variant="body2"
-                    color="text.secondary"
-                  >
-                    {new Date(prj.deadline).toLocaleDateString()}
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: "50%",
+                              backgroundColor: "inherit",
+                              transition: "background-color 0.3s ease",
+                            }}
+                          >
+                            <EditCalendar sx={{ color: "green" }} />
+                          </Box>
+                        </IconButton>
+                      </Link>
+                    </>
+                  }
+                  title={prj.project_name}
+                  subheader={new Date(prj.starting_time).toLocaleDateString()}
+                />
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Status: {prj.status}
                   </Typography>
-                </Typography>
+                  <Grid container spacing={2} sx={{ mb: 1 }}>
+                    <Grid item xs={12} sm={6}>
+                      <Box display="flex" alignItems="center" mt={2}>
+                        <AttachmentOutlined sx={{ marginRight: "5px" }} />
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          onClick={() =>
+                            handleDownloadAttachment(prj.attachment)
+                          }
+                          sx={{
+                            marginLeft: "5px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          1 File
+                        </Typography>
+                        <IconButton
+                          aria-label="download attachment"
+                          onClick={() =>
+                            handleDownloadAttachment(prj.attachment)
+                          }
+                          sx={{ marginLeft: "5px" }}
+                        ></IconButton>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box display="flex" alignItems="center" mt={2}>
+                        <Diversity3 sx={{ marginRight: "8px" }} />
+                        <Typography variant="body2">
+                          {prj.assigned_to.first_name}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
 
-                <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                  Team Leader:
+                  <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                    Deadline:
+                    <Typography
+                      gutterBottom
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      {new Date(prj.deadline).toLocaleDateString()}
+                    </Typography>
+                  </Typography>
+
+                  <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                    Team Leader:
+                    <Typography gutterBottom variant="h6" component="div">
+                      {prj.assigned_to.first_name +
+                        " " +
+                        prj.assigned_to.last_name}
+                    </Typography>
+                  </Typography>
                   <Typography gutterBottom variant="h6" component="div">
-                    {prj.assigned_to.first_name +
-                      " " +
-                      prj.assigned_to.last_name}
+                    Team:
                   </Typography>
-                </Typography>
-                <Typography gutterBottom variant="h6" component="div">
-                  Team:
-                </Typography>
-                <Box mt={2}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    Progress
-                  </Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={10}
-                    sx={{
-                      "& .MuiLinearProgress-bar": {
-                        backgroundColor: "green",
-                      },
-                    }}
-                  />
-                </Box>
-              </CardContent>
-            </Card>
+                  <Box mt={2}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 1 }}
+                    >
+                      Progress
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progress}
+                      sx={{
+                        "& .MuiLinearProgress-bar": {
+                          backgroundColor: "green",
+                        },
+                      }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
             </Grid>
           ))}
         </Grid>
@@ -389,17 +402,16 @@ const AllProjects = () => {
             />
             <span id="file-name-span"></span>
 
-            <TextField
-              multiline
-              rows={4}
-              label="Description"
-              type="textarea"
-              variant="outlined"
+            <ReactQuill
               value={inputs.description}
-              fullWidth
-              onChange={handleChange}
+              onChange={handleDescriptionChange}
               name="description"
+              modules={quillModules}
+              formats={quillFormats}
+              placeholder="Write something..."
+              theme="snow"
             />
+
             <Button variant="contained" onClick={handleAddProject}>
               Submit
             </Button>

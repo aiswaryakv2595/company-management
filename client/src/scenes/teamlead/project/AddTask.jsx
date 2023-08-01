@@ -23,6 +23,7 @@ import Header from "../../../components/Header";
 import { adminApi, teamleadApi } from "../../../redux/api/employeeApi";
 import { useSelector } from "react-redux";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { baseURL } from "../../../redux/api/api";
 
 const AddTask = () => {
   const [tasks, setTasks] = useState([]);
@@ -53,6 +54,22 @@ const AddTask = () => {
       [e.target.name]: e.target.value,
     }));
   };
+  const fetchTasks = async () => {
+    try {
+      const projectId = new URLSearchParams(window.location.search).get("id");
+      if (!projectId) {
+        return;
+      }
+
+      const response = await teamleadApi.singleProjectLead(projectId);
+
+      const sampleTasks = response.task;
+      setTasks(sampleTasks);
+    } catch (error) {
+      console.log("Error fetching tasks:", error);
+    }
+  };
+
 
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   useEffect(() => {
@@ -78,22 +95,7 @@ const AddTask = () => {
       }
     };
 
-    const fetchTasks = async () => {
-      try {
-        const projectId = new URLSearchParams(window.location.search).get("id");
-        if (!projectId) {
-          return;
-        }
-
-        const response = await teamleadApi.singleProjectLead(projectId);
-
-        const sampleTasks = response.task;
-        setTasks(sampleTasks);
-      } catch (error) {
-        console.log("Error fetching tasks:", error);
-      }
-    };
-
+  
     fetchProjectDetails();
     fetchEmployeeDetails();
     fetchTasks();
@@ -101,23 +103,28 @@ const AddTask = () => {
 
   const handleAddTask = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.log("Token is null or undefined");
-        return;
-      }
+    
       const projectId = new URLSearchParams(window.location.search).get("id");
-
+  
       const response = await teamleadApi.addTask(inputs, projectId);
-
-      const newTask = response.task;
-      setTasks((prevTasks) => [...prevTasks, newTask]);
-      toast.success("Task added successfully");
-      setIsModalOpen(false);
+  
+    fetchTasks();
+    toast.success("Task added successfully");
+    setIsModalOpen(false);
+  
+      setInputs({
+        title: "",
+        description: "",
+        starting_date: "",
+        due_date: "",
+        assigned_to: "",
+        priority: "",
+      });
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message);
     }
   };
+  
 
   const handleEdit = (task) => {
     setEditedTask(task);
@@ -191,7 +198,7 @@ const AddTask = () => {
         }
       });
 
-      // Update the task status in the backend
+      
       try {
         await teamleadApi.updateTask({
           task_id: movedTask._id,
@@ -304,7 +311,7 @@ const AddTask = () => {
                                     <Avatar
                                       src={
                                         task.assigned_to.profilePic
-                                          ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                          ? `${baseURL}/dp/${task.assigned_to.profilePic}`
                                           : ""
                                       }
                                     />
@@ -404,7 +411,7 @@ const AddTask = () => {
                                     <Avatar
                                       src={
                                         task.assigned_to.profilePic
-                                          ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                          ? `${baseURL}/dp/${task.assigned_to.profilePic}`
                                           : ""
                                       }
                                     />
@@ -504,7 +511,7 @@ const AddTask = () => {
                                     <Avatar
                                       src={
                                         task.assigned_to.profilePic
-                                          ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                          ? `${baseURL}/dp/${task.assigned_to.profilePic}`
                                           : ""
                                       }
                                     />

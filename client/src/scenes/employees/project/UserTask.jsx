@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Header from "../../../components/Header";
-import { api } from "../../../redux/api/api";
+import { api, baseURL } from "../../../redux/api/api";
 import { useSelector } from "react-redux";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { employeeApi, teamleadApi } from "../../../redux/api/employeeApi";
@@ -94,9 +94,9 @@ const UserTask = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      {tasks.length > 0 && (
-        <Header title={project[0].project_name} subtitle="Task Details" />
-      )}
+      {project.length > 0 && (
+            <Header title={project[0]?.project_name || ""} subtitle="Task Details" />
+          )}
 
       <Typography variant="h6" component="h2">
         Team Lead :
@@ -107,7 +107,7 @@ const UserTask = () => {
       </Typography>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid item xs={12} md={4}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">To Do</Typography>
 
@@ -156,7 +156,7 @@ const UserTask = () => {
                                       <Avatar
                                         src={
                                           task.assigned_to.profilePic
-                                            ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                            ? `${baseURL}/dp/${task.assigned_to.profilePic}`
                                             : ""
                                         }
                                       />
@@ -209,7 +209,7 @@ const UserTask = () => {
               </Droppable>
             </Paper>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={12} md={4}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">Ongoing</Typography>
               <Droppable droppableId="column-ongoing">
@@ -257,7 +257,7 @@ const UserTask = () => {
                                       <Avatar
                                         src={
                                           task.assigned_to.profilePic
-                                            ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                            ? `${baseURL}/dp/${task.assigned_to.profilePic}`
                                             : ""
                                         }
                                       />
@@ -310,7 +310,7 @@ const UserTask = () => {
               </Droppable>
             </Paper>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={12} md={4}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">Complete</Typography>
               <Droppable droppableId="column-complete">
@@ -358,7 +358,7 @@ const UserTask = () => {
                                       <Avatar
                                         src={
                                           task.assigned_to.profilePic
-                                            ? `http://localhost:5000/dp/${task.assigned_to.profilePic}`
+                                            ? `${baseURL}/dp/${task.assigned_to.profilePic}`
                                             : ""
                                         }
                                       />

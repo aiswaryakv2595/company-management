@@ -33,7 +33,10 @@ const ondutySchema = new mongoose.Schema({
     default: 5,
     min: 0,
   },
-  lop:Number,
+  lop:{
+    type:Number,
+    default:0
+  },
   earnedLeaveReset: {
     type: Date,
     default: getFirstDayOfNextMonth,

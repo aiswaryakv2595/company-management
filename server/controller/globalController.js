@@ -45,6 +45,7 @@ const updateProfile = async (req, res) => {
   try {
     const { phone, email, dob, gender, address } = req.body;
     const profilePic = req.file;
+    console.log('profile update',profilePic)
     const id = req.employee._id;
     const profile = await Employee.findOneAndUpdate(
       { _id: id },

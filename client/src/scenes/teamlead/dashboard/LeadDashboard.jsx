@@ -18,6 +18,7 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import MuiGrid from "@mui/material/Grid";
 import styled from "@emotion/styled";
+import { baseURL } from "../../../redux/api/api";
 const LeadDashboard = () => {
   const theme = useTheme();
   const currentDate = moment().format("DD-MM-YYYY");
@@ -76,7 +77,7 @@ const LeadDashboard = () => {
       >
         <Avatar
           alt={employee.first_name}
-          src={`http://localhost:5000/dp/${employee.profilePic}`}
+          src={`${baseURL}/dp/${employee.profilePic}`}
           sx={{ width: 56, height: 56, borderRadius: 0, marginRight: 3 }}
         />
         <Box sx={{ display: "flex", flexDirection: "column" }}>

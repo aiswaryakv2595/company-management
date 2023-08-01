@@ -14,6 +14,13 @@ import {
 import "./project.css"; // Import custom CSS file
 import { adminApi, projectApi } from "../../../redux/api/employeeApi";
 
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import {
+  quillFormats,
+  quillModules,
+} from "../../../styles/texteditor/quillModules";
+
 const EditProject = () => {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
@@ -28,7 +35,12 @@ const EditProject = () => {
     description: "",
   });
   const [file, setFile] = useState(null);
-
+  const handleDescriptionChange = (value) => {
+    setFormValues((prev) => ({
+      ...prev,
+      description: value,
+    }));
+  };
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile);
@@ -48,7 +60,7 @@ const EditProject = () => {
       try {
         const response = await adminApi.getTeamlead();
         const data = response.employees;
-      
+
         setEmployees(data);
       } catch (error) {
         console.log("Error fetching employee details:", error);
@@ -56,7 +68,6 @@ const EditProject = () => {
     };
     const fetchProjectDetails = async () => {
       try {
-       
         const response = await projectApi.getSingleProject(projectId);
 
         const data = response.project;
@@ -91,13 +102,12 @@ const EditProject = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
-    try {
 
+    try {
       const response = await projectApi.updateProject(projectId, formValues);
 
       console.log("Project updated successfully:", response.project);
-     toast.success("project Updated successfully")
+      toast.success("project Updated successfully");
     } catch (error) {
       console.log("Error updating project:", error);
     }
@@ -211,17 +221,14 @@ const EditProject = () => {
                 {formValues.attachment ? formValues.attachment : ""}
               </span>
 
-              <TextField
-                sx={{ mt: 2 }}
-                multiline
-                rows={4}
-                label="Description"
-                type="textarea"
-                variant="outlined"
+              <ReactQuill
                 value={formValues.description}
-                fullWidth
-                onChange={handleChange}
+                onChange={handleDescriptionChange}
                 name="description"
+                modules={quillModules}
+                formats={quillFormats}
+                placeholder="Write something..."
+                theme="snow"
               />
               <Button type="submit" variant="contained">
                 Save

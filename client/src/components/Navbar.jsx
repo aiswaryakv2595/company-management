@@ -22,7 +22,7 @@ import FlexBetween from "./FlexBetween";
 import { setMode } from "../redux/slices/themeSlice";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
-import { api } from "../redux/api/api";
+import { api, baseURL } from "../redux/api/api";
 import { adminApi, employeeApi } from "../redux/api/employeeApi";
 
 
@@ -130,7 +130,7 @@ console.log('navbar ',response)
                     onError={(e) => {
                       console.log("Error loading image:", e.target.src);
                     }}
-                    src={`http://localhost:5000/dp/${employee.profilePic}`}
+                    src={`${baseURL}/dp/${employee.profilePic}`}
                     height="32px"
                     width="32px"
                     borderRadius="50%"

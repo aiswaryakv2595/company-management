@@ -135,11 +135,7 @@ const Payroll = () => {
       <Grid item xs={6} md={3}>
         <Button
           variant="contained"
-          sx={{
-            bgcolor: theme.palette.primary[50],
-            color: theme.palette.secondary[1000],
-            width: "100%",
-          }}
+         color='info'
           onClick={() => setOpenModal(true)}
         >
           + Add Salary

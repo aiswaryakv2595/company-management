@@ -10,6 +10,9 @@ const ViewProject = () => {
     const [project, setProject] = useState([]);
     const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
     const navigate = useNavigate()
+    const renderHTMLContent = (htmlContent) => {
+      return { __html: htmlContent };
+    };
     useEffect(() => {
        
         const fetchProjectDetails = async () => {
@@ -66,9 +69,11 @@ const ViewProject = () => {
                 <Typography variant="h6" gutterBottom>
         Status: {prj.status}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-        {prj.description}
-        </Typography>
+        <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  dangerouslySetInnerHTML={renderHTMLContent(prj.description)}
+                />
         <Typography variant="h6" gutterBottom sx={{mt:2}}>
         Deadline:
         <Typography 
