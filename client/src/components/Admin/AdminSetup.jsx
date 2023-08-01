@@ -42,6 +42,7 @@ const AdminSetup = () => {
           try {
             const response = await adminApi.getDepartment();
             const data = response.department;
+            console.log(data)
             setDepartment(data);
           } catch (error) {}
         };
@@ -154,7 +155,7 @@ const AdminSetup = () => {
               fullWidth
               type="submit"
             >
-              Login
+              SetUp
             </Button>
       </form>
       </div>

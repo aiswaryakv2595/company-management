@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Header from "../../../components/Header";
-import { teamleadApi } from "../../../redux/api/employeeApi";
+import { adminApi, teamleadApi } from "../../../redux/api/employeeApi";
 import { useSelector } from "react-redux";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
@@ -58,8 +58,8 @@ const AddTask = () => {
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await teamleadApi.allEmployees();
-        const data = response.employees;
+        const response = await teamleadApi.teamMembers();
+        const data = response.team;
 
         setEmployees(data);
       } catch (error) {

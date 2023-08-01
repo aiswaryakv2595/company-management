@@ -30,10 +30,13 @@ export const employeeApi = {
 }
 export const teamleadApi = {
     getTeamleadProject:() =>axiosClient.get('/teamlead/view-project'),
+    teamMembers:() => axiosClient.get('/teamlead/team-members'),
     singleProjectLead: projectId => axiosClient.get(`/teamlead/view-task?id=${projectId}`),
     addTask:(inputs,projectId) => axiosClient.post('/teamlead/addtask', { ...inputs, project_id: projectId }),
     updateTask:params =>axiosClient.patch('/update-task-status',params),
-    dashboard:() => axiosClient.get('/teamlead/dashboard')
+    dashboard:() => axiosClient.get('/teamlead/dashboard'),
+    sendMeetingIDEmail: ({ from,meetingID, emailAddresses }) =>
+    axiosClient.post('/teamlead/send-meeting-id', { from, meetingID, emailAddresses }),
 }
 export const dutyApi = {
     allDuty:(from,to) => axiosClient.get(`/onduty-list?from=${from}&to=${to}`),

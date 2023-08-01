@@ -68,4 +68,6 @@ commonRouter.post("/complaints", jwtAuth, addComplaints);
 
 commonRouter.get("/salary", jwtAuth, getSalary);
 
+commonRouter.post('/start-meeting',jwtAuth,)
+
 module.exports = commonRouter;

@@ -96,8 +96,8 @@ const forgotPassword = async (req, res) => {
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "aiswaryakv2595@gmail.com",
-    pass: "pedleujgdkakgblu",
+    user: process.env.MY_EMAIL,
+    pass: process.env.MY_PASSWORD,
   },
 });
 const sendOtpEmail = async (email, otp) => {
@@ -584,6 +584,26 @@ console.log('start')
     res.status(500).json({ message: "Error fetching salary details.", error });
   }
 };
+
+async function sendMeetingIdEmail(meetingId, userEmail) {
+  try {
+    // Define the email options
+    const mailOptions = {
+      from: process.env.MY_EMAIL, 
+      to: userEmail,
+      subject: 'Meeting ID',
+      text: `The meeting ID is: ${meetingId}`,
+    };
+
+    // Send the email using the transporter
+    await transporter.sendMail(mailOptions);
+    console.log('Meeting ID email sent successfully.');
+  } catch (error) {
+    console.error('Error sending meeting ID email:', error);
+  }
+}
+
+
 module.exports = {
   login,
   authUser,

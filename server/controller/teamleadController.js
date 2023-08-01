@@ -1,5 +1,6 @@
 const Project = require('../model/Project')
 const Employee = require('../model/Employee')
+const nodemailer = require("nodemailer");
 
 const dashboard = async (req, res) => {
   try {
@@ -75,6 +76,45 @@ const dashboard = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MY_EMAIL,
+    pass: process.env.MY_PASSWORD,
+  },
+});
+const sendMeetingLink = async (req,res) => {
+  const { from,meetingID, emailAddresses } = req.body;
+  const mailOptions = {
+    from: process.env.MY_EMAIL, //change to from later
+    to: emailAddresses.join(', '), 
+    subject: 'Meeting ID Invitation',
+    text: `You are invited to join a meeting with the ID: ${meetingID}.`,
+  };
+   // Send the email
+   transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Failed to send email:', error);
+      res.status(500).json({ error: 'Failed to send email' });
+    } else {
+      console.log('Email sent successfully:', info.response);
+      res.json({ success: true });
+    }
+  });
+}
+const teamMembers = async (req,res) => {
+  try {
+    const team = await Employee.find({tl_id:req.employee._id})
+    if(team)
+    res.status(200).json({team})
+    else
+    res.status(404).json({message:"no result found"})
+  } catch (error) {
+    res.status(500).json({error})
+  }
+}
   module.exports = {
-    dashboard
+    dashboard,
+    teamMembers,
+    sendMeetingLink
   }

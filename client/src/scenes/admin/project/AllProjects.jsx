@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { api } from "../../../redux/api/api";
 import {
+  Avatar,
+  AvatarGroup,
   Box,
   Button,
   Card,
@@ -31,6 +33,7 @@ import { adminApi, projectApi } from "../../../redux/api/employeeApi";
 const AllProjects = () => {
   const [openModal, setOpenModal] = useState(false);
   const isMobile = useMediaQuery("(max-width: 600px)");
+
   const [project, setProject] = useState([]);
   const [employees, setEmployees] = useState([]);
 
@@ -67,8 +70,9 @@ const AllProjects = () => {
         const response = await projectApi.getAllProject()
 
         const data = response.project;
-
+      
         setProject(data);
+       
       } catch (error) {
         console.log("Error fetching project details:", error);
       }
@@ -143,8 +147,9 @@ const AllProjects = () => {
         </Grid>
       </Grid>
       {project && project.length > 0 ? (
-        <Box mt="20px" display="flex" flexWrap="wrap" gap={2}>
+        <Grid container spacing={2}>
           {project?.map((prj) => (
+            <Grid item xs={12} md={4}>
             <Card
               key={prj._id}
               sx={{
@@ -221,13 +226,13 @@ const AllProjects = () => {
                   <Grid item xs={12} sm={6}>
                     <Box display="flex" alignItems="center" mt={2}>
                       <Diversity3 sx={{ marginRight: "8px" }} />
-                      <Typography variant="body2" color="text.secondary">
-                        Members
-                      </Typography>
+                      <Typography variant="body2">
+           {prj.assigned_to.first_name}
+          </Typography>
                     </Box>
                   </Grid>
                 </Grid>
-
+               
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                   Deadline:
                   <Typography
@@ -270,8 +275,9 @@ const AllProjects = () => {
                 </Box>
               </CardContent>
             </Card>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       ) : (
         <Box>no data</Box>
       )}

@@ -1,16 +1,19 @@
+const Employee = require("../model/Employee");
 const Project = require("../model/Project");
 
 
 const viewAllProject = async (req, res) => {
   try {
     const project = await Project.find().populate("assigned_to task.assigned_to");
+    
     if (project) {
       res.status(200).json({ project });
     } else {
-      res.status(404).json({ message: "Project not found" });
+      res.status(404).json({ message: "Projects not found" });
     }
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

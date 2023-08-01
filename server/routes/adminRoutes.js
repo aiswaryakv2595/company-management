@@ -30,7 +30,7 @@ const adminRouter = express.Router();
 
 adminRouter.post("/signup", adminSignup);
 adminRouter.get("/admin-setup",findAdmin)
-adminRouter.get("/department", jwtAuth, departmentDetails);
+adminRouter.get("/department", departmentDetails);
 adminRouter.post("/department", jwtAuth, addDepartment);
 adminRouter.patch("/department", jwtAuth, updateDepartment);
 adminRouter.get("/employees", jwtAuth, employeeDetails);

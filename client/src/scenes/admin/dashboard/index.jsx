@@ -241,11 +241,11 @@ function Dashboard() {
           <List>
       <ListItem disablePadding>
         <ListItemIcon>
-          <AdjustIcon color="success" />
+          <AdjustIcon sx={{color:"#679436"}} />
         </ListItemIcon>
         <Stack direction="row" alignItems="center" spacing={1} flexGrow={1}>
           <ListItemText primary="Completed Tasks" />
-          <Chip label={dashboardData.statusCountsTask?.complete || 0} color="success" sx={{ borderRadius: 0 }} />
+          <Chip label={dashboardData.statusCountsTask?.complete || 0}  sx={{ borderRadius: 0,width:"32px",color:"white", backgroundColor:"#679436" }} />
         </Stack>
       </ListItem>
       <ListItem disablePadding>
@@ -254,16 +254,16 @@ function Dashboard() {
         </ListItemIcon>
         <Stack direction="row" alignItems="center" spacing={1} flexGrow={1}>
           <ListItemText primary="Ongoing Task" />
-          <Chip label={dashboardData.statusCountsTask?.ongoing || 0} color="info" sx={{ borderRadius: 0 }} />
+          <Chip label={dashboardData.statusCountsTask?.ongoing || 0} color="info" sx={{ borderRadius: 0, width:"32px" }} />
         </Stack>
       </ListItem>
       <ListItem disablePadding>
         <ListItemIcon>
-          <AdjustIcon color="error" />
+          <AdjustIcon sx={{color:"#D52941"}} />
         </ListItemIcon>
         <Stack direction="row" alignItems="center" spacing={1} flexGrow={1}>
           <ListItemText primary="Pending Tasks" />
-          <Chip label={dashboardData.statusCountsTask?.todo || 0} color="error" sx={{ borderRadius: 0 }} />
+          <Chip label={dashboardData.statusCountsTask?.todo || 0} sx={{ borderRadius: 0, width:"32px", background:"#D52941", color:"white" }} />
         </Stack>
       </ListItem>
     </List>

@@ -4,18 +4,17 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { adminApi } from '../../redux/api/employeeApi';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Unstable_Grid2';
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
+import { styled, useTheme } from '@mui/material/styles';
+
+const CenteredBox = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
 }));
 
 const VideoCallPage = () => {
+  const theme = useTheme()
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null); // Set initial value to null
   const role = useSelector((state) => state.employee.role);
@@ -53,22 +52,20 @@ const VideoCallPage = () => {
   }, [navigate, role, employee]);
 
   return (
-    <div>
-      <Box m="1.5rem 2.5rem" sx={{ flexGrow: 1 }}>
-      <Grid container spacing={2}>
-      <Grid xs={2}>
-      <Typography>Create a meeting</Typography>
-      </Grid>
-      <Grid xs={4}>
-      <Button variant='contained' color='info' onClick={handleJoin}>
-        create
-      </Button>
-        </Grid>
-      
-      </Grid>
-
-      </Box>
-    </div>
+    <CenteredBox>
+    <Typography variant="h4" color="info" mb={4}>
+      Start or Join a Meeting
+    </Typography>
+    <Button variant="contained"
+   sx={{
+    bgcolor: theme.palette.primary[50],
+    color: theme.palette.secondary[1000],
+    
+  }}
+    onClick={handleJoin}>
+      Create a Meeting
+    </Button>
+  </CenteredBox>
   );
 };
 
