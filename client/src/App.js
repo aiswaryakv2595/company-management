@@ -2,8 +2,8 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { themeSettings } from "./theme";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useMemo, useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Dashboard from "./scenes/admin/dashboard";
 import Layout from "./scenes/admin/layout";
 import LoginForm from "./components/Login";
@@ -48,8 +48,9 @@ import EmployeePayload from "./scenes/admin/payroll/EmployeePayload";
 import VideoPlayer from "./scenes/meet/VideoPlayer";
 import Options from "./scenes/meet/Options";
 import { adminApi } from "./redux/api/employeeApi";
-import { logout,setAdminExists } from "./redux/slices/authSlice";
+import { setAdminExists } from "./redux/slices/authSlice";
 import AdminSetup from "./components/Admin/AdminSetup";
+import ViewHoliday from "./scenes/leave/ViewHoliday";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -57,15 +58,13 @@ function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   useEffect(() => {
-   
     const checkAdminExistence = async () => {
       try {
-       
-        const response = await adminApi.findAdmin()
-        const { exists } = response; 
+        const response = await adminApi.findAdmin();
+        const { exists } = response;
         dispatch(setAdminExists(exists));
       } catch (error) {
-        console.error('Error checking admin existence:', error);
+        console.error("Error checking admin existence:", error);
       }
     };
 
@@ -80,6 +79,7 @@ function App() {
         <Routes>
           <Route element={<AdminPrivateRoutes />}>
             <Route element={<Layout />}>
+            <Route path="/admin/profile" element={<ProfileSettings />} />
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route path="/admin/department" element={<Department />} />
               <Route path="/admin/employees" element={<AllEmployees />} />
@@ -100,12 +100,10 @@ function App() {
             </Route>
           </Route>
           <Route element={<AdminPublicRoutes />}>
-         
-          <Route path="/" element={<LoginForm />} />
-       
-          <Route path="/admin-setup" element={<AdminSetup />} />
-      
-          
+            <Route path="/" element={<LoginForm />} />
+
+            <Route path="/admin-setup" element={<AdminSetup />} />
+
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/otp" element={<OtpPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -118,6 +116,7 @@ function App() {
               <Route path="/view-task" element={<UserTask />} />
               <Route path="/onduty" element={<OndutyList />} />
               <Route path="/leaves" element={<LeaveList />} />
+              <Route path="/holiday" element={<ViewHoliday />} />
               <Route path="/timesheet" element={<EmployeeTimesheet />} />
               <Route path="/attendance" element={<AttendanceReport />} />
               <Route path="/request" element={<Complaints />} />
@@ -157,6 +156,7 @@ function App() {
               <Route path="/teamlead/slip" element={<SlipGenerator />} />
               <Route path="/teamlead/meet" element={<VideoCallPage />} />
               <Route path="/teamlead/room/:roomId" element={<VideoPlayer />} />
+              <Route path="/teamlead/holiday" element={<ViewHoliday />} />
             </Route>
           </Route>
         </Routes>

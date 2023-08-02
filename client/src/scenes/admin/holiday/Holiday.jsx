@@ -45,12 +45,9 @@ const Holiday = () => {
         try {
           const updatedResponse = await adminApi.addHoliday(inputs);
     
-        //   const response = await adminApi.getDepartment();
-    
           const newHoliday = updatedResponse.holiday;
           setHoliday((prev) => [...prev, newHoliday]);
     
-        //   setHoliday(newDepartment);
           setOpenAddModal(false);
           toast.success("Holiday added sucessfully");
         } catch (error) {

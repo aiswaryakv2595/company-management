@@ -14,13 +14,15 @@ import { adminApi, dutyApi, teamleadApi } from "../../../redux/api/employeeApi";
 import moment from "moment";
 import StatBox from "../../../components/Admin/StatBox";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import MuiGrid from "@mui/material/Grid";
 import styled from "@emotion/styled";
 import { baseURL } from "../../../redux/api/api";
+import {useNavigate} from 'react-router-dom'
+import { AssignmentTurnedInOutlined, EventAvailableOutlined } from "@mui/icons-material";
 const LeadDashboard = () => {
   const theme = useTheme();
+  const navigate = useNavigate()
   const currentDate = moment().format("DD-MM-YYYY");
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   const [employee, setEmployee] = useState([]);
@@ -104,20 +106,19 @@ const LeadDashboard = () => {
             title="Total Projects"
             value={dashboardData.projectCount}
             icon={
-              <EventAvailableIcon color="secondary" sx={{ fontSize: "40px" }} />
+              <EventAvailableOutlined  sx={{ fontSize: "40px" }} />
             }
           />
           <StatBox
             title="Progress Projects"
             value={dashboardData.statusCounts?.pending || 0}
-            icon={<AccountTreeIcon color="info" sx={{ fontSize: "40px" }} />}
+            icon={<AccountTreeOutlinedIcon sx={{ fontSize: "40px" }} />}
           />
           <StatBox
             title="Finished Projects"
             value={dashboardData.statusCounts?.complete || 0}
             icon={
-              <AssignmentTurnedInIcon
-                color="success"
+              <AssignmentTurnedInOutlined
                 sx={{ fontSize: "40px" }}
               />
             }
@@ -194,7 +195,7 @@ const LeadDashboard = () => {
                 </Grid>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                <Button variant="contained" color="info">
+                <Button variant="contained" color="info" onClick={()=>navigate('/teamlead/leaves')}>
                   Add Leave
                 </Button>
               </Box>

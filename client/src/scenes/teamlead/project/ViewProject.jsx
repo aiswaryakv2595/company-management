@@ -2,7 +2,6 @@ import { Box, Card, CardContent, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import Header from '../../../components/Header'
 import { useSelector } from 'react-redux';
-import { api } from '../../../redux/api/api';
 import { useNavigate } from 'react-router-dom';
 import { teamleadApi } from '../../../redux/api/employeeApi';
 

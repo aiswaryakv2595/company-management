@@ -105,12 +105,7 @@ console.log('navbar ',response)
         </FlexBetween>
         {/* RIGHT SIDE */}
         <FlexBetween gap="1.5rem">
-          <IconButton>
-            <NotificationsOutlined
-              sx={{ fontSize: "30", color: theme.palette.primary[50] }}
-            />{" "}
-            {/* Notification icon */}
-          </IconButton>
+          
           <FlexBetween>
             {isLoggedIn ? (
               <Button

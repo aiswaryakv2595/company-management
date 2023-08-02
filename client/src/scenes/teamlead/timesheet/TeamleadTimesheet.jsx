@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../../components/Header";
-import { Box, Button, Divider, MenuItem, Modal, TableCell, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Button, Divider, MenuItem, Modal, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { adminApi, dutyApi, teamleadApi } from "../../../redux/api/employeeApi";
-import EditIcon from "@mui/icons-material/Edit";
 import Grid from '@mui/material/Unstable_Grid2';
 import { DataGrid } from "@mui/x-data-grid";
 import moment from "moment"; 
@@ -75,7 +74,7 @@ const TeamleadTimesheet = () => {
         try {
           const response = await dutyApi.getTimesheet();
           const data = response.timesheet;
-          console.log("Timesheet Data:", data); // Check the response here
+          console.log("Timesheet Data:", data); 
           setTimesheet(data);
         } catch (error) {
           console.log("Error fetching timesheet details:", error);

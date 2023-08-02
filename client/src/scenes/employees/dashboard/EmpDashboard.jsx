@@ -20,6 +20,8 @@ import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurned
 import MuiGrid from "@mui/material/Grid";
 import moment from 'moment';
 import { baseURL } from "../../../redux/api/api";
+import {useNavigate} from 'react-router-dom'
+
 const EmpDashboard = () => {
   const currentDate = moment().format('DD-MM-YYYY');
   const [employee, setEmployee] = useState([]);
@@ -36,12 +38,12 @@ const EmpDashboard = () => {
     balanceLeave: 0,
   });
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
+  const navigate = useNavigate()
   useEffect(() => {
     const fetchReport = async () => {
       try {
         const response = await adminApi.userDetails();
         const data = response.employee;
-        // console.log(data)
         setEmployee(data);
       } catch (error) {}
     };
@@ -197,7 +199,7 @@ const EmpDashboard = () => {
                 </Grid>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                <Button variant="contained" color="info">
+                <Button variant="contained" color="info" onClick={()=>navigate('/leaves')}>
                   Add Leave
                 </Button>
               </Box>

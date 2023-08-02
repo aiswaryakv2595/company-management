@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import {
+  Avatar,
+  AvatarGroup,
   Box,
   Button,
   Card,
@@ -29,6 +31,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header";
 import { adminApi, projectApi } from "../../../redux/api/employeeApi";
 import { quillFormats, quillModules } from "../../../styles/texteditor/quillModules";
+import { baseURL } from "../../../redux/api/api";
 
 
 
@@ -73,6 +76,16 @@ const AllProjects = () => {
   };
   const theme = useTheme();
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
+  const getUniqueAssignedToEmployees = (tasks) => {
+    const uniqueAssignedToEmployees = [];
+    tasks.forEach((task) => {
+      const employeeId = task.assigned_to._id;
+      if (!uniqueAssignedToEmployees.some((employee) => employee._id === employeeId)) {
+        uniqueAssignedToEmployees.push(task.assigned_to);
+      }
+    });
+    return uniqueAssignedToEmployees;
+  };
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
@@ -80,7 +93,7 @@ const AllProjects = () => {
 
         const data = response.project;
         setProgress(response.progress)
-        console.log(response)
+        console.log('project',response.project)
 
         setProject(data);
       } catch (error) {
@@ -268,6 +281,16 @@ const AllProjects = () => {
                   <Typography gutterBottom variant="h6" component="div">
                     Team:
                   </Typography>
+                  <AvatarGroup max={4}>
+               
+                {getUniqueAssignedToEmployees(prj.task).map((employee) => (
+                  <Avatar
+                    key={employee._id}
+                    alt={employee.first_name}
+                    src={`${baseURL}/dp/${employee.profilePic}`}
+                  />
+                ))}
+              </AvatarGroup>
                   <Box mt={2}>
                     <Typography
                       variant="body2"

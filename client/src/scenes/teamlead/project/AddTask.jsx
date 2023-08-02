@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Header from "../../../components/Header";
-import { adminApi, teamleadApi } from "../../../redux/api/employeeApi";
+import { teamleadApi } from "../../../redux/api/employeeApi";
 import { useSelector } from "react-redux";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { baseURL } from "../../../redux/api/api";
@@ -178,7 +178,6 @@ const AddTask = () => {
         }
       });
     } else {
-      // Move to a different column
       const sourceTasks = updatedTasks.filter(
         (task) => task.status === source.droppableId
       );
@@ -206,7 +205,7 @@ const AddTask = () => {
         });
       } catch (error) {
         console.log("Error updating task status:", error);
-        // You can handle the error accordingly
+     
       }
     }
 
