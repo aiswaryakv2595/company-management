@@ -11,7 +11,7 @@ const cron = require('node-cron');
 
 app.use(morgan('dev'));
 dotenv.config();
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+app.use(cors({ credentials: true, origin: 'https://strategix.netlify.app' }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
