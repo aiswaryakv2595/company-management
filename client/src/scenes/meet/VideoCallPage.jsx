@@ -16,13 +16,13 @@ const CenteredBox = styled(Box)(({ theme }) => ({
 const VideoCallPage = () => {
   const theme = useTheme()
   const navigate = useNavigate();
-  const [employee, setEmployee] = useState(null); // Set initial value to null
+  const [employee, setEmployee] = useState(null); 
   const role = useSelector((state) => state.employee.role);
   const isLoggedIn = useSelector((state) => state.employee.isLoggedIn);
   console.log(role);
 
   useEffect(() => {
-    // Fetch employee data from the backend when the component mounts
+   
     const fetchEmployeeData = async () => {
       try {
         const response = await adminApi.userDetails();
@@ -45,7 +45,6 @@ const VideoCallPage = () => {
       return;
     }
 
-    // Generate a random room ID
     const newRoomId = uuidv4();
 
     navigate(`/${role}/room/${newRoomId}`);

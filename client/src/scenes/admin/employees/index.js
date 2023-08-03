@@ -249,6 +249,7 @@ const AllEmployees = () => {
         console.log("Updated Employee List:", updatedData);
 
         setEmployee(updatedData);
+        fetchUserDetails();
         toast.success("Employee added successfully");
         setOpenModal(false);
       }
