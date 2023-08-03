@@ -104,7 +104,7 @@ mongoose
       }
     }
     
-    // cron.schedule('0 9 * * *', sendReminderEmails);
+    cron.schedule('0 9 * * *', sendReminderEmails);
     // Start the server
     app.listen(5000, () => {
       console.log('Server is running on port 5000');
