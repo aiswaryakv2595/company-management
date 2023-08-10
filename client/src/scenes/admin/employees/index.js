@@ -381,7 +381,7 @@ const AllEmployees = () => {
             getRowId={(row) => row._id}
             initialState={{
               pagination: {
-                paginationModel: { page: 0, pageSize: isMobile ? 3 : 5 }, 
+                paginationModel: { page: 0, pageSize: isMobile ? 5 : 10 }, 
               },
             }}
             autoHeight
