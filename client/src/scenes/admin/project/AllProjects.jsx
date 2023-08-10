@@ -86,20 +86,21 @@ const AllProjects = () => {
     });
     return uniqueAssignedToEmployees;
   };
+  const fetchProjectDetails = async () => {
+    try {
+      const response = await projectApi.getAllProject();
+
+      const data = response.project;
+      setProgress(response.progress)
+      console.log('project',response.project)
+
+      setProject(data);
+    } catch (error) {
+      console.log("Error fetching project details:", error);
+    }
+  };
   useEffect(() => {
-    const fetchProjectDetails = async () => {
-      try {
-        const response = await projectApi.getAllProject();
-
-        const data = response.project;
-        setProgress(response.progress)
-        console.log('project',response.project)
-
-        setProject(data);
-      } catch (error) {
-        console.log("Error fetching project details:", error);
-      }
-    };
+   
     const fetchEmployeeDetails = async () => {
       try {
         const response = await adminApi.getTeamlead();
@@ -130,6 +131,7 @@ const AllProjects = () => {
 
       const newProject = response.project;
       setProject((prevProjects) => [...prevProjects, newProject]);
+      fetchProjectDetails()
       setOpenModal(false);
     } catch (error) {
       console.log("Error adding project:", error);
