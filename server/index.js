@@ -54,9 +54,21 @@ mongoose
       try {
         
         const currentDate = new Date();
-        const projects = await Project.find({ $or: [{ deadline: { $lte: currentDate } }, { 'task.due_date': { $lte: currentDate } }] })
-          .populate('assigned_to task.assigned_to')
-          .exec();
+         const projects = await Project.find({
+    $and: [
+        {
+            $or: [
+                { deadline: { $lte: currentDate } },
+                { 'task.due_date': { $lte: currentDate } }
+            ]
+        },
+        { status: { $ne: 'complete' } }
+    ]
+})
+.populate('assigned_to task.assigned_to')
+.exec();
+
+        
     
         // Loop through each project and send reminder emails
         for (const project of projects) {
