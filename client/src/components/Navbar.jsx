@@ -63,13 +63,7 @@ console.log('navbar ',response)
             // Show message to the user (optional)
             console.log('Token expired. Please log in again.');
             
-            // Clear user session (token) - this depends on how you handle the token in your app
-            // For example:
-            // localStorage.removeItem('token');
-            
-            // Redirect to login page (you can use React Router or your preferred method)
-            // For example:
-            // history.push('/login');
+          
           } else {
             // Show message for other unauthorized cases (optional)
             console.log('You are not authorized to access this page.');

@@ -54,7 +54,17 @@ mongoose
       try {
         
         const currentDate = new Date();
-        const projects = await Project.find({ $or: [{ deadline: { $lte: currentDate } }, { 'task.due_date': { $lte: currentDate } }] })
+        const projects = await Project.find({
+              $and: [
+                  {
+                      $or: [
+                          { deadline: { $lte: currentDate } },
+                          { 'task.due_date': { $lte: currentDate } }
+                      ]
+                  },
+                  { status: { $ne: 'complete' } }
+              ]
+          })
           .populate('assigned_to task.assigned_to')
           .exec();
     
@@ -107,7 +117,7 @@ mongoose
       }
     }
     
-    cron.schedule('0 9 * * *', sendReminderEmails);
+    // cron.schedule('0 9 * * *', sendReminderEmails);
     // Start the server
     app.listen(5000, () => {
       console.log('Server is running on port 5000');
