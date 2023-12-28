@@ -99,10 +99,10 @@ mongoose
             if (task.due_date && task.due_date <= currentDate) {
               const assignedToEmployee = await Employee.findById(task.assigned_to);
               const taskTitle = task.title;
-              // Send the email using the same transporter defined earlier
+              
               const mailOptions = {
                 from: process.env.MY_EMAIL,
-                to: process.env.MY_EMAIL, // Assuming 'Employee' model has an 'email' field
+                to: process.env.MY_EMAIL, 
                 subject: `Reminder: Task "${taskTitle}" due date approaching`,
                 text: `Dear ${assignedToEmployee.first_name},\n\nThis is a reminder that the due date for the task "${taskTitle}" is approaching. Please complete the task as soon as possible.\n\nRegards,\nYour Company`,
               };
@@ -117,7 +117,7 @@ mongoose
       }
     }
     
-    // cron.schedule('0 9 * * *', sendReminderEmails);
+    
     // Start the server
     app.listen(5000, () => {
       console.log('Server is running on port 5000');
