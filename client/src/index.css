@@ -5,7 +5,7 @@ body{
   font-family: 'Poppins', sans-serif;
 }
 .root{
-  background: radial-gradient(circle at 100% 107%, #ff89cc 0%, #9cb8ec 30%, #00ffee 60%, #62c2fe 100%);
+  background: radial-gradient(circle at 100% 107%, #ff89cc 0%, #9cb8ec 30%, #00ffee 60%, #62c2fe 100%) !important;
 }
 #root,
 .app{
