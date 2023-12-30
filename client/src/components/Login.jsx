@@ -23,12 +23,15 @@ const LoginForm = () => {
     email: "",
     password: "",
   });
+  const [isEmailValid, setEmailValid] = useState(true);
+  const [isPasswordValid, setPasswordValid] = useState(true);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const sendRequest = async () => {
     try {
+    
       const res = await authApi.login({
         email: inputs.email,
         password: inputs.password,
@@ -52,6 +55,24 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let isValid = true;
+    // Validate email
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!inputs.email || !emailPattern.test(inputs.email)) {
+      setEmailValid(false);
+      isValid = false;
+    } else {
+      setEmailValid(true);
+    }
+
+    // Validate password
+    if (!inputs.password ) {
+      setPasswordValid(false);
+      isValid = false;
+    } else {
+      setPasswordValid(true);
+    }
+    if(isValid){
     sendRequest()
       .then((data) => {
         console.log("data---", data);
@@ -64,9 +85,11 @@ const LoginForm = () => {
           navigate("/teamlead/dashboard");
         }
       })
+    
       .catch((err) => {
         toast.error(err?.response?.data?.message || err.message);
       });
+    }
   };
 
   const handleChange = (e) => {
@@ -90,7 +113,11 @@ const LoginForm = () => {
               name="email"
               onChange={handleChange}
               value={inputs.email}
-              className='textField' />
+              className='textField' 
+              error={!isEmailValid}
+              helperText={
+                !isEmailValid && "Please enter a valid email address"
+              }/>
       </p>
       <p>
       <TextField  label="Password"
@@ -100,7 +127,12 @@ const LoginForm = () => {
               fullWidth
               onChange={handleChange}
               value={inputs.password}
-              className='textField' />
+              className='textField'
+              error={!isPasswordValid}
+                  helperText={
+                    !isPasswordValid &&
+                    "Enter password"
+                  } />
       </p>
       <p>
       <Link to="/forgot-password" className='forgotPassword'>
