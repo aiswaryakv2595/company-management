@@ -117,7 +117,8 @@ const LoginForm = () => {
               error={!isEmailValid}
               helperText={
                 !isEmailValid && "Please enter a valid email address"
-              }/>
+              }
+              required/>
       </p>
       <p>
       <TextField  label="Password"
@@ -132,7 +133,8 @@ const LoginForm = () => {
                   helperText={
                     !isPasswordValid &&
                     "Enter password"
-                  } />
+                  }
+                  required />
       </p>
       <p>
       <Link to="/forgot-password" className='forgotPassword'>
