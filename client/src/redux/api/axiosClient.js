@@ -1,7 +1,7 @@
 import axios from "axios";
 import querySting from "query-string";
 
-const baseUrl = ' https://www.strategix-cms.online/api';
+const baseUrl = 'https://strategix-backend.onrender.com/api';
 const getToken = () => localStorage.getItem('token');
 
 const axiosClient = axios.create({
