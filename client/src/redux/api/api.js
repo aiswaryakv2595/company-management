@@ -1,6 +1,6 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: ' https://www.strategix-cms.online/api' 
+  baseURL: ' https://strategix-backend.onrender.com/api' 
 });
-export const baseURL = ' https://strategix-backend.onrender.com/';
+export const baseURL = ' https://strategix-backend.onrender.com';
